@@ -33,7 +33,8 @@
 2. 确定当前日期和对应的周目录（格式：`weekly/YYYY-WXX/`）
 3. 如果周目录不存在，创建它，并基于 `weekly/WEEKLY-TEMPLATE.md` 创建 `weekly-plan.md`
 4. 基于 `weekly/DAILY-TEMPLATE.md` 创建当日日志（文件名：`mon.md`, `tue.md`, `wed.md`, `thu.md`, `fri.md`, `sat.md`, `sun.md`）
-5. 将玩家汇报的内容填入日志
+5. **在日志的"玩家原始输入"部分，原样记录玩家的汇报原文**（保留原始表述，不做修改）
+6. 将玩家汇报的内容解析后填入日志的结构化任务部分
 
 ### 第二步：自动计算积分并更新进度
 
