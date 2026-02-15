@@ -1,0 +1,60 @@
+{
+  "goals": [
+    {
+      "id": "math-olympiad-prep",
+      "name": "奥数冲刺",
+      "description": "完成100道竞赛/奥数难题",
+      "icon": "🏅",
+      "target": 100,
+      "current": 11,
+      "completed": false,
+      "reward": {
+        "gold": 500,
+        "xp": 300,
+        "stars": 20
+      }
+    },
+    {
+      "id": "french-a1",
+      "name": "法语入门",
+      "description": "法语学习累计达到50次",
+      "icon": "🗼",
+      "target": 50,
+      "current": 10,
+      "completed": false,
+      "reward": {
+        "gold": 300,
+        "xp": 200,
+        "stars": 15
+      }
+    },
+    {
+      "id": "reading-100",
+      "name": "阅读百日",
+      "description": "英语阅读累计达到100次",
+      "icon": "📚",
+      "target": 100,
+      "current": 11,
+      "completed": false,
+      "reward": {
+        "gold": 300,
+        "xp": 200,
+        "stars": 15
+      }
+    },
+    {
+      "id": "streak-30",
+      "name": "30天挑战",
+      "description": "达成30天连续完成任务",
+      "icon": "🔥",
+      "target": 30,
+      "current": 13,
+      "completed": false,
+      "reward": {
+        "gold": 500,
+        "xp": 300,
+        "stars": 20
+      }
+    }
+  ]
+}

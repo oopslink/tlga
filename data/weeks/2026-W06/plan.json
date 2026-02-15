@@ -1,0 +1,154 @@
+{
+  "weekId": "2026-W06",
+  "startDate": "2026-02-03",
+  "endDate": "2026-02-09",
+  "dailyGoals": [
+    {
+      "date": "2026-02-03",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "completed": true
+        },
+        {
+          "taskId": "math-simple",
+          "targetVariant": "正确率80%+",
+          "completed": true,
+          "achievedVariant": "正确率80%+"
+        },
+        {
+          "taskId": "english-reading",
+          "completed": true
+        }
+      ],
+      "status": "completed"
+    },
+    {
+      "date": "2026-02-04",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "completed": true
+        },
+        {
+          "taskId": "juggling",
+          "targetVariant": "连续30个",
+          "completed": true,
+          "achievedVariant": "连续30个"
+        },
+        {
+          "taskId": "french-reading",
+          "completed": true
+        }
+      ],
+      "status": "completed"
+    },
+    {
+      "date": "2026-02-05",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "completed": true
+        },
+        {
+          "taskId": "math-simple",
+          "targetVariant": "正确率100%",
+          "completed": true,
+          "achievedVariant": "正确率100%"
+        },
+        {
+          "taskId": "piano",
+          "targetVariant": "练习20分钟",
+          "completed": true,
+          "achievedVariant": "练习20分钟"
+        }
+      ],
+      "status": "completed"
+    },
+    {
+      "date": "2026-02-06",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "completed": true
+        },
+        {
+          "taskId": "english-reading",
+          "completed": true
+        },
+        {
+          "taskId": "recitation",
+          "completed": true
+        },
+        {
+          "taskId": "polite",
+          "completed": true
+        }
+      ],
+      "status": "completed"
+    },
+    {
+      "date": "2026-02-07",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "completed": true
+        },
+        {
+          "taskId": "math-simple",
+          "targetVariant": "正确率80%+",
+          "completed": true,
+          "achievedVariant": "正确率100%"
+        },
+        {
+          "taskId": "juggling",
+          "targetVariant": "连续50个",
+          "completed": true,
+          "achievedVariant": "连续50个"
+        }
+      ],
+      "status": "completed"
+    },
+    {
+      "date": "2026-02-08",
+      "tasks": [
+        {
+          "taskId": "piano",
+          "targetVariant": "练习30分钟",
+          "completed": true,
+          "achievedVariant": "练习30分钟"
+        },
+        {
+          "taskId": "handwriting",
+          "targetVariant": "练习20分钟",
+          "completed": true,
+          "achievedVariant": "练习20分钟"
+        },
+        {
+          "taskId": "french-reading",
+          "completed": true
+        }
+      ],
+      "status": "completed"
+    },
+    {
+      "date": "2026-02-09",
+      "tasks": [
+        {
+          "taskId": "english-reading",
+          "completed": true
+        },
+        {
+          "taskId": "french-reading",
+          "completed": true
+        },
+        {
+          "taskId": "recitation",
+          "completed": true
+        }
+      ],
+      "status": "completed"
+    }
+  ],
+  "createdAt": "2026-02-03T00:00:00.000Z"
+}

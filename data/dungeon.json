@@ -1,0 +1,169 @@
+{
+  "dungeons": [
+    {
+      "id": "math-tower",
+      "name": "奥数高塔",
+      "icon": "🗼",
+      "allCompleted": false,
+      "completionBonus": {
+        "gold": 100,
+        "xp": 50,
+        "stars": 5
+      },
+      "stages": [
+        {
+          "id": "math-tower-1",
+          "name": "第一层：基础关",
+          "description": "完成10道竞赛级以上题目",
+          "requirement": "math-competition-plus",
+          "target": 10,
+          "current": 8,
+          "completed": false,
+          "reward": {
+            "gold": 50,
+            "xp": 30,
+            "stars": 2
+          }
+        },
+        {
+          "id": "math-tower-2",
+          "name": "第二层：挑战关",
+          "description": "完成20道竞赛级以上题目",
+          "requirement": "math-competition-plus",
+          "target": 20,
+          "current": 8,
+          "completed": false,
+          "reward": {
+            "gold": 80,
+            "xp": 50,
+            "stars": 3
+          }
+        },
+        {
+          "id": "math-tower-3",
+          "name": "第三层：奥数关",
+          "description": "完成10道奥数难题",
+          "requirement": "math-olympiad",
+          "target": 10,
+          "current": 3,
+          "completed": false,
+          "reward": {
+            "gold": 120,
+            "xp": 80,
+            "stars": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "french-forest",
+      "name": "法语森林",
+      "icon": "🌲",
+      "allCompleted": false,
+      "completionBonus": {
+        "gold": 80,
+        "xp": 40,
+        "stars": 5
+      },
+      "stages": [
+        {
+          "id": "french-forest-1",
+          "name": "林间小径",
+          "description": "法语学习累计10次",
+          "requirement": "french-count",
+          "target": 10,
+          "current": 10,
+          "completed": true,
+          "reward": {
+            "gold": 40,
+            "xp": 25,
+            "stars": 2
+          }
+        },
+        {
+          "id": "french-forest-2",
+          "name": "密林深处",
+          "description": "法语学习累计25次",
+          "requirement": "french-count",
+          "target": 25,
+          "current": 10,
+          "completed": false,
+          "reward": {
+            "gold": 70,
+            "xp": 40,
+            "stars": 3
+          }
+        },
+        {
+          "id": "french-forest-3",
+          "name": "森林之心",
+          "description": "法语学习累计50次",
+          "requirement": "french-count",
+          "target": 50,
+          "current": 10,
+          "completed": false,
+          "reward": {
+            "gold": 100,
+            "xp": 60,
+            "stars": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "english-ocean",
+      "name": "英语海洋",
+      "icon": "🌊",
+      "allCompleted": false,
+      "completionBonus": {
+        "gold": 80,
+        "xp": 40,
+        "stars": 5
+      },
+      "stages": [
+        {
+          "id": "english-ocean-1",
+          "name": "浅海探索",
+          "description": "英语阅读累计15次",
+          "requirement": "english-reading-count",
+          "target": 15,
+          "current": 11,
+          "completed": false,
+          "reward": {
+            "gold": 40,
+            "xp": 25,
+            "stars": 2
+          }
+        },
+        {
+          "id": "english-ocean-2",
+          "name": "深海潜行",
+          "description": "英语阅读累计40次",
+          "requirement": "english-reading-count",
+          "target": 40,
+          "current": 11,
+          "completed": false,
+          "reward": {
+            "gold": 70,
+            "xp": 40,
+            "stars": 3
+          }
+        },
+        {
+          "id": "english-ocean-3",
+          "name": "海底宝藏",
+          "description": "英语阅读累计80次",
+          "requirement": "english-reading-count",
+          "target": 80,
+          "current": 11,
+          "completed": false,
+          "reward": {
+            "gold": 100,
+            "xp": 60,
+            "stars": 5
+          }
+        }
+      ]
+    }
+  ]
+}

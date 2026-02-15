@@ -1,0 +1,43 @@
+{
+  "unlocked": [
+    {
+      "id": "first-perfect",
+      "name": "完美一天",
+      "description": "第一次完成所有每日任务",
+      "icon": "⭐",
+      "hidden": true,
+      "unlockedAt": "2026-02-01",
+      "reward": {
+        "gold": 50,
+        "xp": 30,
+        "stars": 2
+      }
+    },
+    {
+      "id": "streak-7",
+      "name": "七日不败",
+      "description": "连续7天完成任务",
+      "icon": "🔥",
+      "hidden": true,
+      "unlockedAt": "2026-02-07",
+      "reward": {
+        "gold": 70,
+        "xp": 40,
+        "stars": 3
+      }
+    },
+    {
+      "id": "language-master",
+      "name": "语言大师",
+      "description": "单日完成所有3种语言学习",
+      "icon": "🌍",
+      "hidden": true,
+      "unlockedAt": "2026-02-05",
+      "reward": {
+        "gold": 50,
+        "xp": 30,
+        "stars": 2
+      }
+    }
+  ]
+}

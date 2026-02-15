@@ -1,0 +1,63 @@
+{
+  "date": "2026-02-01",
+  "homework": {
+    "completed": true,
+    "quality": "good",
+    "selfChecked": true
+  },
+  "math": {
+    "completed": true,
+    "difficulty": "medium",
+    "problems": 5,
+    "allCorrect": false
+  },
+  "juggling": {
+    "completed": true,
+    "minutes": 15,
+    "newRecord": false
+  },
+  "languages": [
+    {
+      "type": "english-reading",
+      "completed": true,
+      "minutes": 18
+    },
+    {
+      "type": "english-words",
+      "completed": true,
+      "minutes": 11
+    },
+    {
+      "type": "french",
+      "completed": true,
+      "minutes": 28
+    }
+  ],
+  "randomDrops": [
+    {
+      "type": "piano",
+      "completed": true,
+      "note": "练习曲"
+    },
+    {
+      "type": "social",
+      "completed": true,
+      "note": "和朋友玩耍"
+    }
+  ],
+  "rewards": {
+    "baseGold": 0,
+    "levelBonusGold": 0,
+    "mathMultipliedGold": 0,
+    "streakGold": 0,
+    "totalGold": 0,
+    "baseXp": 0,
+    "totalXp": 0,
+    "baseStars": 0,
+    "levelBonusStars": 0,
+    "totalStars": 0,
+    "breakdown": []
+  },
+  "mathMultiplier": 1,
+  "streakDay": 1
+}

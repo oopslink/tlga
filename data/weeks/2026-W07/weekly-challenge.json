@@ -1,0 +1,51 @@
+{
+  "weekId": "2026-W07",
+  "challenges": [
+    {
+      "id": "2026-W07-homework-5",
+      "title": "作业达人",
+      "description": "本周完成5天作业",
+      "target": 5,
+      "current": 4,
+      "reward": {
+        "gold": 50,
+        "xp": 30,
+        "stars": 2
+      },
+      "completed": false
+    },
+    {
+      "id": "2026-W07-math-3",
+      "title": "数学冲刺",
+      "description": "本周完成3天数学练习(hard以上)",
+      "target": 3,
+      "current": 3,
+      "reward": {
+        "gold": 60,
+        "xp": 40,
+        "stars": 3
+      },
+      "completed": true
+    },
+    {
+      "id": "2026-W07-language-4",
+      "title": "多语种学者",
+      "description": "本周完成4天语言学习",
+      "target": 4,
+      "current": 4,
+      "reward": {
+        "gold": 50,
+        "xp": 30,
+        "stars": 2
+      },
+      "completed": true
+    }
+  ],
+  "challengesCompleted": 2,
+  "bonusApplied": true,
+  "totalRewards": {
+    "gold": 210,
+    "xp": 100,
+    "stars": 10
+  }
+}

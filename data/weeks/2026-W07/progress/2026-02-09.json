@@ -1,0 +1,24 @@
+{
+  "date": "2026-02-09",
+  "weekId": "2026-W07",
+  "status": "pending",
+  "tasks": [
+    {
+      "taskId": "homework",
+      "note": "eee",
+      "completed": false,
+      "finalGold": 0,
+      "finalXp": 0
+    },
+    {
+      "taskId": "math-simple",
+      "note": "rrr",
+      "completed": false,
+      "finalGold": 0,
+      "finalXp": 0
+    }
+  ],
+  "settled": false,
+  "totalGold": 0,
+  "totalXp": 0
+}

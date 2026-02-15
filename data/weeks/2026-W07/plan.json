@@ -1,0 +1,47 @@
+{
+  "weekId": "2026-W07",
+  "startDate": "2026-02-09",
+  "endDate": "2026-02-15",
+  "status": "active",
+  "dailyPlans": [
+    {
+      "date": "2026-02-09",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "note": "eee"
+        },
+        {
+          "taskId": "math-simple",
+          "note": "rrr"
+        }
+      ]
+    },
+    {
+      "date": "2026-02-10",
+      "tasks": []
+    },
+    {
+      "date": "2026-02-11",
+      "tasks": []
+    },
+    {
+      "date": "2026-02-12",
+      "tasks": []
+    },
+    {
+      "date": "2026-02-13",
+      "tasks": []
+    },
+    {
+      "date": "2026-02-14",
+      "tasks": []
+    },
+    {
+      "date": "2026-02-15",
+      "tasks": []
+    }
+  ],
+  "createdAt": "2026-02-15T02:01:53.931Z",
+  "updatedAt": "2026-02-15T04:10:46.169Z"
+}

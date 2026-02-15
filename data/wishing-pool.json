@@ -1,0 +1,19 @@
+{
+  "wishes": [
+    {
+      "id": "w1",
+      "description": "去游乐园",
+      "starsRequired": 20,
+      "createdAt": "2026-02-03",
+      "granted": false
+    },
+    {
+      "id": "w2",
+      "description": "买一本漫画书",
+      "starsRequired": 10,
+      "createdAt": "2026-02-05",
+      "granted": false
+    }
+  ],
+  "totalStarsSpent": 0
+}

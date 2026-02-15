@@ -1,0 +1,47 @@
+{
+  "date": "2026-02-03",
+  "homework": {
+    "completed": true,
+    "quality": "perfect",
+    "selfChecked": false
+  },
+  "math": {
+    "completed": true,
+    "difficulty": "hard",
+    "problems": 6,
+    "allCorrect": true
+  },
+  "juggling": {
+    "completed": true,
+    "minutes": 24,
+    "newRecord": true
+  },
+  "languages": [
+    {
+      "type": "english-reading",
+      "completed": true,
+      "minutes": 23
+    },
+    {
+      "type": "french",
+      "completed": true,
+      "minutes": 20
+    }
+  ],
+  "randomDrops": [],
+  "rewards": {
+    "baseGold": 0,
+    "levelBonusGold": 0,
+    "mathMultipliedGold": 0,
+    "streakGold": 0,
+    "totalGold": 0,
+    "baseXp": 0,
+    "totalXp": 0,
+    "baseStars": 0,
+    "levelBonusStars": 0,
+    "totalStars": 0,
+    "breakdown": []
+  },
+  "mathMultiplier": 1,
+  "streakDay": 3
+}
