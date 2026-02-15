@@ -33,3 +33,5 @@ go.work.sum
 
 # Claude Code
 .claude/
+
+.DS_Store
