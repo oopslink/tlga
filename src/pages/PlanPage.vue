@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <h1>📅 周计划管理</h1>
     <p class="dim">{{ planStore.weekId }} &nbsp; <span class="status-badge" :class="planStore.plan?.status">{{ statusText }}</span></p>
 
     <div v-if="planStore.loading" class="loading">加载中...</div>
@@ -22,7 +21,7 @@
             <div class="plan-task-note">
               <input class="input" v-model="dp.tasks[i].note" placeholder="备注说明..." />
             </div>
-            <button class="btn-remove" @click="planStore.removeTask(dp.date, i)">删除</button>
+            <button class="btn-icon btn-icon-danger btn-icon-sm" @click="planStore.removeTask(dp.date, i)" title="删除任务">🗑️</button>
           </div>
 
           <!-- 添加新任务 -->
@@ -34,7 +33,7 @@
               </optgroup>
             </select>
             <input class="input" v-model="addState[dp.date].note" placeholder="备注说明" style="flex:1" />
-            <button class="button" @click="doAdd(dp.date)" :disabled="!addState[dp.date].taskId">添加</button>
+            <button class="btn-icon btn-icon-success btn-icon-sm" @click="doAdd(dp.date)" :disabled="!addState[dp.date].taskId" title="添加任务">➕</button>
           </div>
         </div>
       </div>
@@ -64,13 +63,16 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, computed } from 'vue'
 import { usePlanStore } from '@/stores/plan.store'
-import { getTaskById, getTasksByCategory, CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory } from '@/types/tasks'
+import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
+import { getTaskById, getTasksByCategory } from '@/utils/tasks'
+import { CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory } from '@/types/tasks'
 import { formatDateCN, currentWeek } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
 
 const { showAlert, showConfirm } = useModal()
 
 const planStore = usePlanStore()
+const taskDefinitionsStore = useTaskDefinitionsStore()
 const expanded = ref(new Set<string>())
 const categories: TaskCategory[] = ['academic', 'sports', 'language', 'art', 'behavior']
 
@@ -123,6 +125,7 @@ async function handleDelete() {
 }
 
 onMounted(async () => {
+  taskDefinitionsStore.load()
   await planStore.loadWeek(currentWeek())
   if (planStore.plan) {
     for (const dp of planStore.plan.dailyPlans) {
@@ -144,6 +147,8 @@ onMounted(async () => {
 .variant-tag { background:rgba(255,215,0,.15); color:var(--color-gold); padding:2px 8px; border-radius:4px; font-size:13px; }
 .add-row { display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap; }
 .add-row .select { margin:0; width:auto; flex-shrink:0; }
+.add-row .input { margin:0; }
+.add-row .button { margin:0; }
 .actions-bar { display:flex; gap:12px; margin-top:24px; flex-wrap:wrap; }
 .btn-activate { background:var(--color-success); }
 .btn-warning { background:var(--color-warning); color:#1a1a2e; }

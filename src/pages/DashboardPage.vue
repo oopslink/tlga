@@ -1,7 +1,5 @@
 <template>
   <div class="container">
-    <h1>仪表盘</h1>
-
     <!-- 玩家状态 -->
     <div class="card" v-if="playerStore.player">
       <h2>{{ playerStore.player.name }}</h2>

@@ -12,7 +12,11 @@
     "init-data": "npx tsx scripts/init-data.ts",
     "seed-demo": "npx tsx scripts/seed-demo.ts",
     "seed-new": "npx tsx scripts/seed-new-demo.ts",
-    "stagewise": "npx stagewise@latest"
+    "stagewise": "npx stagewise@latest",
+    "generate-icons": "npx tsx scripts/generate-icons.ts",
+    "deploy": "npm run deploy:github",
+    "deploy:github": "npm run build && gh-pages -d dist",
+    "deploy:vercel": "npm run build && vercel --prod"
   },
   "dependencies": {
     "pinia": "^3.0.4",
@@ -24,10 +28,13 @@
     "@vitejs/plugin-vue": "^6.0.2",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
+    "gh-pages": "^6.3.0",
     "happy-dom": "^20.6.1",
+    "sharp": "^0.34.5",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.0.18",
     "vue-tsc": "^3.1.5"
   }

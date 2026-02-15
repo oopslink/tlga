@@ -1,24 +1,44 @@
 {
   "date": "2026-02-09",
   "weekId": "2026-W07",
-  "status": "pending",
+  "status": "approved",
   "tasks": [
     {
       "taskId": "homework",
       "note": "eee",
-      "completed": false,
-      "finalGold": 0,
-      "finalXp": 0
+      "completed": true,
+      "finalGold": 1,
+      "finalXp": 0,
+      "approverOverrideCompleted": true
     },
     {
       "taskId": "math-simple",
-      "note": "rrr",
-      "completed": false,
-      "finalGold": 0,
-      "finalXp": 0
+      "note": "rrr sofas",
+      "completed": true,
+      "finalGold": 3,
+      "finalXp": 0,
+      "achievedVariant": "正确率80%+",
+      "approverOverrideCompleted": true,
+      "approverOverrideVariant": "正确率80%+"
+    },
+    {
+      "taskId": "唱歌",
+      "note": "休闲鞋",
+      "completed": true,
+      "finalGold": 1,
+      "finalXp": 0,
+      "achievedVariant": "非常好",
+      "kidComment": "学习",
+      "approverOverrideCompleted": true,
+      "approverOverrideVariant": "非常好"
     }
   ],
-  "settled": false,
-  "totalGold": 0,
-  "totalXp": 0
+  "settled": true,
+  "totalGold": 5,
+  "totalXp": 0,
+  "submittedAt": "2026-02-15T12:11:50.020Z",
+  "bonusMultiplier": 1,
+  "bonusGold": 0,
+  "bonusXp": 0,
+  "reviewedAt": "2026-02-15T14:52:44.983Z"
 }

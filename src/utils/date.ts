@@ -96,3 +96,42 @@ export function daysBetween(date1: string, date2: string): number {
   const d2 = parseDate(date2)
   return Math.round(Math.abs(d2.getTime() - d1.getTime()) / 86400000)
 }
+
+/**
+ * Get previous week ID
+ */
+export function getPreviousWeek(weekId: string): string {
+  const dates = getWeekDates(weekId)
+  const monday = parseDate(dates[0])
+  monday.setDate(monday.getDate() - 7)
+  return getISOWeek(monday)
+}
+
+/**
+ * Get next week ID
+ */
+export function getNextWeek(weekId: string): string {
+  const dates = getWeekDates(weekId)
+  const monday = parseDate(dates[0])
+  monday.setDate(monday.getDate() + 7)
+  return getISOWeek(monday)
+}
+
+/**
+ * Format week ID for display: "2026年第7周"
+ */
+export function formatWeekCN(weekId: string): string {
+  const [year, weekStr] = weekId.split('-W')
+  const week = parseInt(weekStr)
+  return `${year}年第${week}周`
+}
+
+/**
+ * Get week date range for display: "2月10日 - 2月16日"
+ */
+export function getWeekRangeCN(weekId: string): string {
+  const dates = getWeekDates(weekId)
+  const start = parseDate(dates[0])
+  const end = parseDate(dates[6])
+  return `${start.getMonth() + 1}月${start.getDate()}日 - ${end.getMonth() + 1}月${end.getDate()}日`
+}

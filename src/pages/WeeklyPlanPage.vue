@@ -45,6 +45,7 @@
             <div v-for="(task, index) in day.tasks" :key="index" class="task-item">
               <input type="checkbox" class="checkbox" v-model="task.completed"
                      @change="handleTaskToggle(day.date, index, task)">
+              <span class="task-icon">{{ getCatIcon(task.taskId) }}</span>
               <div class="task-info">
                 <strong>{{ getTaskName(task.taskId) }}</strong>
                 <select v-if="hasVariants(task.taskId)" class="select-small"
@@ -58,7 +59,11 @@
                   +{{ getTaskRewardValue(task.taskId, task.achievedVariant).gold }}💰
                 </span>
               </div>
-              <button class="btn-remove" @click="weeklyStore.removeTask(day.date, index)">删除</button>
+              <button class="btn-icon btn-icon-danger btn-icon-sm"
+                      @click="weeklyStore.removeTask(day.date, index)"
+                      title="删除任务">
+                🗑️
+              </button>
             </div>
           </div>
 
@@ -102,7 +107,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { useWeeklyPlanStore } from '@/stores/weekly-plan.store'
-import { TASK_DEFINITIONS, getTasksByCategory, getTaskById, getTaskReward, CATEGORY_NAMES, type TaskCategory } from '@/types/tasks'
+import { TASK_DEFINITIONS, getTasksByCategory, getTaskById, getTaskReward, CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory } from '@/types/tasks'
 import type { PlannedTask } from '@/types/tasks'
 import { formatDateCN } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
@@ -169,6 +174,11 @@ function getTaskRewardValue(taskId: string, variant?: string) {
   return getTaskReward(taskId, variant)
 }
 
+function getCatIcon(taskId: string) {
+  const task = getTaskById(taskId)
+  return task ? CATEGORY_ICONS[task.category] : ''
+}
+
 function handleAddTask(date: string) {
   const taskId = newTask[date]
   if (!taskId) return
@@ -210,7 +220,7 @@ async function handleSave() {
 .day-card {
   background: var(--color-bg-light);
   border-radius: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   overflow: hidden;
 }
 
@@ -262,60 +272,69 @@ async function handleSave() {
 }
 
 .tasks-list {
-  margin: 16px 0;
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .task-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 8px;
+  padding: 8px 12px;
   background: var(--color-bg);
   border-radius: 8px;
-  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.task-item:hover {
+  background: var(--color-bg-elevated);
+  transform: translateX(4px);
+}
+
+.task-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
 .task-info {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.task-info strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .select-small {
-  padding: 6px 12px;
-  font-size: 14px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
   width: auto;
   margin: 0;
+  border-radius: 6px;
 }
 
 .reward-badge {
   background: rgba(255, 215, 0, 0.2);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--color-gold);
-}
-
-.btn-remove {
-  background: rgba(233, 69, 96, 0.2);
-  color: var(--color-primary);
-  border: none;
-  padding: 6px 12px;
+  padding: 3px 8px;
   border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-remove:hover {
-  background: rgba(233, 69, 96, 0.3);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  white-space: nowrap;
 }
 
 .add-task-section {
   display: flex;
-  gap: 12px;
-  margin: 16px 0;
+  gap: 8px;
+  margin: 12px 0;
 }
 
 .add-task-section .select {
@@ -323,33 +342,41 @@ async function handleSave() {
   margin: 0;
 }
 
+.add-task-section .button {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
 .reward-preview {
   background: rgba(255, 215, 0, 0.1);
   border: 2px solid var(--color-gold);
-  padding: 16px;
+  padding: 12px;
   border-radius: 8px;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .reward-preview h4 {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: var(--color-gold);
+  font-size: 1rem;
 }
 
 .reward-item {
   display: flex;
   justify-content: space-between;
-  padding: 6px 0;
+  padding: 4px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9rem;
 }
 
 .reward-total {
   display: flex;
   justify-content: space-between;
-  padding: 12px 0 0 0;
+  padding: 8px 0 0 0;
   font-weight: 700;
-  font-size: 18px;
-  margin-top: 8px;
+  font-size: 1.1rem;
+  margin-top: 6px;
   border-top: 2px solid var(--color-gold);
 }
 </style>

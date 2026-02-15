@@ -1,12 +1,32 @@
 <template>
   <div class="container">
-    <h1>🔍 审批进度单</h1>
+    <!-- 本周快速导航 -->
+    <div class="week-quick-nav">
+      <div
+        v-for="date in weekDates"
+        :key="date"
+        class="day-nav-item"
+        :class="{
+          active: date === selectedDate,
+          today: date === today(),
+          submitted: getSheetStatus(date) === 'submitted',
+          approved: getSheetStatus(date) === 'approved',
+          rejected: getSheetStatus(date) === 'rejected',
+          pending: getSheetStatus(date) === 'pending'
+        }"
+        @click="goToDate(date)"
+      >
+        <div class="day-label">{{ getDayLabel(date) }}</div>
+        <div class="day-date">{{ getMonthDay(date) }}</div>
+        <div class="day-status-dot"></div>
+      </div>
+    </div>
 
-    <!-- 日期选择 -->
-    <div class="date-nav">
-      <button class="btn-nav" @click="prevDay" :disabled="!canGoPrev">&larr;</button>
+    <!-- 传统左右箭头导航(保留) -->
+    <div class="date-nav-arrows">
+      <button class="btn-nav" @click="prevDay" :disabled="!canGoPrev">&larr; 上一天</button>
       <span class="date-display">{{ formatDateCN(selectedDate) }}</span>
-      <button class="btn-nav" @click="nextDay" :disabled="!canGoNext">&rarr;</button>
+      <button class="btn-nav" @click="nextDay" :disabled="!canGoNext">下一天 &rarr;</button>
     </div>
 
     <div v-if="progressStore.loading" class="loading">加载中...</div>
@@ -30,7 +50,9 @@
         <div v-for="(task, idx) in sheet.tasks" :key="idx" class="task-card">
           <div class="task-header">
             <span class="task-cat">{{ getCatIcon(task.taskId) }}</span>
-            <strong>{{ getTaskName(task.taskId) }}</strong>
+            <div class="task-header-content">
+              <strong>{{ getTaskName(task.taskId) }}</strong>
+            </div>
           </div>
 
           <!-- 小学霸填写的内容 -->
@@ -45,7 +67,7 @@
           </div>
 
           <!-- 审批操作 -->
-          <div class="approve-section" v-if="isReviewable">
+          <div class="approve-section" v-if="isReviewable && overrides[idx]">
             <div class="form-row">
               <span class="label-inline">确认结果:</span>
               <select class="select-inline" v-model="overrides[idx].result" @change="onResultChange(idx)">
@@ -162,11 +184,13 @@
         <!-- 操作按钮 -->
         <div class="actions-bar">
           <template v-if="isReviewable">
-            <button class="button btn-approve" @click="handleApprove">✅ 通过并结算</button>
+            <button class="button btn-approve" @click="handleApprove">
+              {{ sheet.status === 'approved' ? '✅ 重新审批并结算' : '✅ 通过并结算' }}
+            </button>
             <button class="button btn-reject" @click="handleReject">❌ 驳回</button>
-          </template>
-          <template v-else-if="sheet.status === 'approved'">
-            <p class="dim">已审批通过并结算</p>
+            <p v-if="sheet.status === 'approved'" class="dim" style="width: 100%;">
+              💡 提示：此进度单已审批，可以调整奖励后重新结算
+            </p>
           </template>
           <template v-else-if="sheet.status === 'rejected'">
             <p class="dim">已驳回，等待小学霸修改重新提交</p>
@@ -181,8 +205,9 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProgressStore } from '@/stores/progress.store'
-import { getTaskById, getTaskReward, type TaskVariant } from '@/types/tasks'
-import { CATEGORY_ICONS } from '@/types/tasks'
+import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
+import { getTaskById, getTaskReward } from '@/utils/tasks'
+import { CATEGORY_ICONS, type TaskVariant } from '@/types/tasks'
 import { formatDateCN, today, currentWeek, getWeekDates } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
 
@@ -191,6 +216,7 @@ const { showAlert, showConfirm } = useModal()
 const route = useRoute()
 const router = useRouter()
 const progressStore = useProgressStore()
+const taskDefinitionsStore = useTaskDefinitionsStore()
 
 const weekId = currentWeek()
 const weekDates = getWeekDates(weekId)
@@ -198,7 +224,19 @@ const weekDates = getWeekDates(weekId)
 const selectedDate = computed(() => (route.params.date as string) || today())
 
 const sheet = computed(() => progressStore.currentSheet)
-const isReviewable = computed(() => sheet.value?.status === 'submitted')
+// 允许已审批的进度单重新审批
+const isReviewable = computed(() =>
+  sheet.value?.status === 'submitted' || sheet.value?.status === 'approved'
+)
+
+// 用于存储所有进度单状态
+const sheetsMap = computed(() => {
+  const map: Record<string, string> = {}
+  for (const sheet of progressStore.weekSheets) {
+    map[sheet.date] = sheet.status
+  }
+  return map
+})
 
 const statusText = computed(() => {
   const m: Record<string, string> = { pending: '待填写', submitted: '待审批', approved: '已审批', rejected: '已驳回' }
@@ -227,6 +265,25 @@ function prevDay() {
 function nextDay() {
   const idx = weekDates.indexOf(selectedDate.value)
   if (idx >= 0 && idx < weekDates.length - 1) router.push(`/approve/${weekDates[idx + 1]}`)
+}
+
+function goToDate(date: string) {
+  router.push(`/approve/${date}`)
+}
+
+function getDayLabel(date: string) {
+  const d = new Date(date + 'T00:00:00')
+  const days = ['日', '一', '二', '三', '四', '五', '六']
+  return days[d.getDay()]
+}
+
+function getMonthDay(date: string) {
+  const d = new Date(date + 'T00:00:00')
+  return `${d.getMonth() + 1}/${d.getDate()}`
+}
+
+function getSheetStatus(date: string): string {
+  return sheetsMap.value[date] || 'pending'
 }
 
 function getTaskName(id: string) { return getTaskById(id)?.name ?? id }
@@ -261,14 +318,40 @@ function inferResult(task: { taskId: string; completed: boolean; achievedVariant
 
 function initOverrides() {
   overrides.length = 0
-  bonus.multiplier = 1
-  bonus.gold = 0
-  bonus.xp = 0
+  bonus.multiplier = sheet.value?.bonusMultiplier ?? 1
+  bonus.gold = sheet.value?.bonusGold ?? 0
+  bonus.xp = sheet.value?.bonusXp ?? 0
+  reviewComment.value = sheet.value?.reviewComment ?? ''
+
   if (!sheet.value) return
-  for (const task of sheet.value.tasks) {
-    const result = inferResult(task)
-    const reward = calcDefaultReward(task.taskId, result)
-    overrides.push({ result, gold: reward.gold, xp: reward.xp, comment: '' })
+
+  // 如果已审批，使用之前的审批结果初始化
+  if (sheet.value.status === 'approved') {
+    for (const task of sheet.value.tasks) {
+      // 从 finalGold/finalXp 和 override 字段恢复审批结果
+      let result = '__uncompleted'
+      if (task.approverOverrideCompleted !== undefined) {
+        if (task.approverOverrideCompleted) {
+          result = task.approverOverrideVariant || '__completed'
+        }
+      } else if (task.completed) {
+        result = task.achievedVariant || '__completed'
+      }
+
+      overrides.push({
+        result,
+        gold: task.finalGold ?? 0,
+        xp: task.finalXp ?? 0,
+        comment: task.approverComment ?? '',
+      })
+    }
+  } else {
+    // 未审批，使用小学霸填写的数据初始化
+    for (const task of sheet.value.tasks) {
+      const result = inferResult(task)
+      const reward = calcDefaultReward(task.taskId, result)
+      overrides.push({ result, gold: reward.gold, xp: reward.xp, comment: '' })
+    }
   }
 }
 
@@ -328,10 +411,19 @@ function applyOverrides() {
 }
 
 async function handleApprove() {
-  if (!await showConfirm('确认审批通过？将自动结算积分。')) return
+  const isReApproval = sheet.value?.status === 'approved'
+  const message = isReApproval
+    ? '确认重新审批？将使用新的奖励重新结算积分。'
+    : '确认审批通过？将自动结算积分。'
+
+  if (!await showConfirm(message)) return
   applyOverrides()
   await progressStore.approveSheet(reviewComment.value || undefined)
-  await showAlert('审批通过，积分已结算！')
+
+  const successMsg = isReApproval
+    ? '重新审批成功，积分已更新！'
+    : '审批通过，积分已结算！'
+  await showAlert(successMsg)
 }
 
 async function handleReject() {
@@ -342,76 +434,556 @@ async function handleReject() {
 }
 
 async function loadData() {
+  // 加载整周的进度单状态，用于显示导航状态
+  await progressStore.loadWeekSheets(weekId, weekDates)
+  // 加载当前选中日期的详细进度单
   await progressStore.loadSheet(weekId, selectedDate.value)
   initOverrides()
 }
 
 watch(() => route.params.date, () => { loadData() })
-onMounted(() => { loadData() })
+onMounted(() => {
+  taskDefinitionsStore.load()
+  loadData()
+})
 </script>
 
 <style scoped>
-.date-nav { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
-.date-display { font-size:20px; font-weight:700; min-width:160px; text-align:center; }
-.btn-nav { background:var(--color-bg-lighter); color:var(--color-text); border:none; border-radius:8px; padding:8px 16px; font-size:18px; cursor:pointer; transition:background .2s; }
-.btn-nav:hover:not(:disabled) { background:var(--color-primary); }
-.btn-nav:disabled { opacity:.3; cursor:not-allowed; }
+/* 本周快速导航 */
+.week-quick-nav {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+  animation: slideUp 0.6s ease-out;
+}
 
-.task-card { background:var(--color-bg-light); border-radius:12px; padding:20px; margin-bottom:12px; }
-.task-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.task-cat { font-size:20px; }
+.day-nav-item {
+  background: var(--color-bg-card);
+  border: 2px solid rgba(255, 107, 157, 0.1);
+  border-radius: 16px;
+  padding: 16px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
 
-.variant-tag { padding:2px 8px; border-radius:4px; font-size:13px; }
-.variant-tag.achieved { background:rgba(16,185,129,.15); color:var(--color-success); }
+.day-nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
 
-.kid-section { background:var(--color-bg); border-radius:8px; padding:12px; margin:8px 0; }
-.kid-row { display:flex; align-items:center; gap:12px; }
-.kid-comment { margin-top:4px; font-size:13px; }
-.completed-yes { color:var(--color-success); font-weight:600; }
-.completed-no { color:var(--color-text-dim); }
+.day-nav-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+}
 
-.approve-section { border-top:1px solid var(--color-bg-lighter); padding-top:12px; margin-top:12px; }
-.approve-section .input { margin-top:8px; margin-bottom:0; }
+.day-nav-item:hover::before {
+  transform: scaleX(1);
+}
 
-.form-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.label-inline { font-weight:600; min-width:80px; flex-shrink:0; }
-.select-inline { background:var(--color-bg); color:var(--color-text); border:2px solid var(--color-bg-lighter); border-radius:8px; padding:6px 12px; font-size:14px; flex:1; }
-.select-inline:focus { outline:none; border-color:var(--color-primary); }
+.day-nav-item.active {
+  background: var(--gradient-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: var(--shadow-lg);
+}
 
-.reward-edit-row { display:flex; gap:16px; margin:8px 0; }
-.reward-edit-item { display:flex; align-items:center; gap:6px; }
-.label-sm { font-size:13px; font-weight:600; }
-.input-sm { background:var(--color-bg); color:var(--color-text); border:2px solid var(--color-bg-lighter); border-radius:6px; padding:4px 8px; font-size:14px; width:80px; text-align:center; }
-.input-sm:focus { outline:none; border-color:var(--color-primary); }
+.day-nav-item.active::before {
+  transform: scaleX(1);
+}
 
-.bonus-card { margin-top:16px; }
-.bonus-row { display:flex; gap:24px; flex-wrap:wrap; }
-.bonus-item { display:flex; flex-direction:column; gap:6px; }
-.bonus-item .label { font-size:13px; font-weight:600; }
-.bonus-input-wrap { display:flex; align-items:center; gap:4px; }
-.bonus-prefix { font-weight:700; font-size:16px; color:var(--color-text-dim); }
+.day-nav-item.today {
+  border-color: var(--color-gold);
+  border-width: 3px;
+}
 
-.result-section { border-top:1px solid var(--color-bg-lighter); padding-top:12px; margin-top:12px; }
-.result-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:4px; }
-.override-tag { background:rgba(245,158,11,.15); color:var(--color-warning); padding:2px 8px; border-radius:4px; font-size:13px; }
-.reward-line { font-weight:600; }
+.day-label {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
 
-.reward-preview { background:rgba(255,215,0,.1); border:2px solid var(--color-gold); padding:20px; border-radius:10px; margin-top:16px; }
-.breakdown-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.1); }
-.breakdown-item:last-child { border-bottom:none; }
-.breakdown-item.total { font-weight:700; font-size:18px; border-top:2px solid rgba(255,255,255,.15); border-bottom:none; padding-top:12px; margin-top:4px; }
+.day-date {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.7;
+}
 
-.actions-bar { display:flex; gap:12px; margin-top:24px; flex-wrap:wrap; align-items:center; }
-.btn-approve { background:var(--color-success); }
-.btn-reject { background:transparent; border:2px solid var(--color-primary); color:var(--color-primary); }
+.day-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin: 8px auto 0;
+  background: var(--color-text-dim);
+  opacity: 0.3;
+}
 
-.status-badge { padding:4px 12px; border-radius:20px; font-size:13px; font-weight:600; }
-.status-badge.pending { background:rgba(160,160,160,.15); color:var(--color-text-dim); }
-.status-badge.submitted { background:rgba(245,158,11,.15); color:var(--color-warning); }
-.status-badge.approved { background:rgba(16,185,129,.15); color:var(--color-success); }
-.status-badge.rejected { background:rgba(233,69,96,.15); color:var(--color-primary); }
+.day-nav-item.submitted .day-status-dot {
+  background: var(--color-warning);
+  opacity: 1;
+  animation: pulse 1.5s ease-in-out infinite;
+}
 
-.dim { color:var(--color-text-dim); }
-.gold { color:var(--color-gold); }
-.xp { color:var(--color-xp); }
+.day-nav-item.approved .day-status-dot {
+  background: var(--color-success);
+  opacity: 1;
+  box-shadow: 0 0 8px var(--color-success);
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+.day-nav-item.rejected .day-status-dot {
+  background: var(--color-danger);
+  opacity: 1;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.day-nav-item.active .day-status-dot {
+  background: var(--color-text-inverse);
+  opacity: 1;
+}
+
+/* 传统箭头导航 */
+.date-nav-arrows {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.date-display {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  min-width: 200px;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+.btn-nav {
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  border: 2px solid rgba(255, 107, 157, 0.15);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Fredoka', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-nav:hover:not(:disabled) {
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 任务卡片 */
+.task-card {
+  background: var(--color-bg-card);
+  border: 2px solid rgba(255, 107, 157, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+  animation: slideUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.task-card:nth-child(1) { animation-delay: 0.05s; }
+.task-card:nth-child(2) { animation-delay: 0.1s; }
+.task-card:nth-child(3) { animation-delay: 0.15s; }
+.task-card:nth-child(4) { animation-delay: 0.2s; }
+
+.task-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+}
+
+.task-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.task-header-content {
+  flex: 1;
+}
+
+.task-cat {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.variant-tag {
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.variant-tag.achieved {
+  background: linear-gradient(135deg, rgba(6, 214, 160, 0.15), rgba(6, 214, 160, 0.2));
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.kid-section {
+  background: var(--color-bg-elevated);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px 0;
+  border: 2px solid rgba(94, 174, 255, 0.15);
+}
+
+.kid-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.kid-comment {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: rgba(94, 174, 255, 0.1);
+  border-left: 3px solid var(--color-xp);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.completed-yes {
+  color: var(--color-success);
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.completed-no {
+  color: var(--color-text-dim);
+  font-weight: 600;
+}
+
+.approve-section {
+  border-top: 2px solid rgba(255, 107, 157, 0.1);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.approve-section .input {
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding: 8px 14px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: var(--color-bg-elevated);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.form-row:hover {
+  background: rgba(255, 107, 157, 0.05);
+}
+
+.label-inline {
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.select-inline {
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  border: 2px solid rgba(255, 107, 157, 0.15);
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  font-family: 'Quicksand', sans-serif;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+.select-inline:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.1);
+}
+
+.reward-edit-row {
+  display: flex;
+  gap: 20px;
+  margin: 12px 0;
+}
+
+.reward-edit-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label-sm {
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.input-sm {
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  border: 2px solid rgba(255, 107, 157, 0.15);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.95rem;
+  font-family: 'Fredoka', sans-serif;
+  width: 90px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.input-sm:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.1);
+}
+
+.bonus-card {
+  margin-top: 20px;
+}
+
+.bonus-row {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.bonus-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bonus-item .label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.bonus-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bonus-prefix {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-text-dim);
+  font-family: 'Fredoka', sans-serif;
+}
+
+.result-section {
+  border-top: 2px solid rgba(255, 107, 157, 0.1);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+
+.result-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.override-tag {
+  background: linear-gradient(135deg, rgba(255, 168, 0, 0.2), rgba(255, 218, 118, 0.2));
+  color: var(--color-warning);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  border: 1px solid var(--color-warning);
+}
+
+.reward-line {
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.05rem;
+  margin-top: 8px;
+}
+
+.reward-preview {
+  background: linear-gradient(135deg, rgba(255, 182, 39, 0.1) 0%, rgba(255, 218, 118, 0.15) 100%);
+  border: 3px solid var(--color-gold);
+  padding: 24px;
+  border-radius: 20px;
+  margin-top: 24px;
+  box-shadow: 0 8px 24px var(--color-gold-glow);
+  position: relative;
+  overflow: hidden;
+  animation: rewardPulse 2s ease-in-out infinite;
+}
+
+.reward-preview::before {
+  content: '✨';
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 2rem;
+  opacity: 0.5;
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+@keyframes rewardPulse {
+  0%, 100% { box-shadow: 0 8px 24px var(--color-gold-glow); }
+  50% { box-shadow: 0 12px 32px var(--color-gold-glow); }
+}
+
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 2px solid rgba(255, 182, 39, 0.2);
+  font-family: 'Quicksand', sans-serif;
+}
+
+.breakdown-item:last-child {
+  border-bottom: none;
+}
+
+.breakdown-item.total {
+  font-weight: 700;
+  font-size: 1.3rem;
+  border-top: 3px solid var(--color-gold);
+  border-bottom: none;
+  padding-top: 16px;
+  margin-top: 8px;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.actions-bar {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-approve {
+  background: linear-gradient(135deg, var(--color-success) 0%, #06d6a0 100%) !important;
+}
+
+.btn-reject {
+  background: transparent !important;
+  border: 3px solid var(--color-danger) !important;
+  color: var(--color-danger) !important;
+  box-shadow: none !important;
+}
+
+.btn-reject:hover {
+  background: linear-gradient(135deg, rgba(239, 71, 111, 0.1), rgba(255, 107, 157, 0.1)) !important;
+  border-color: var(--color-danger) !important;
+}
+
+.status-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.status-badge.pending {
+  background: rgba(136, 136, 136, 0.15);
+  color: var(--color-text-dim);
+}
+
+.status-badge.submitted {
+  background: linear-gradient(135deg, rgba(255, 168, 0, 0.2), rgba(255, 218, 118, 0.2));
+  color: var(--color-warning);
+  border: 1px solid var(--color-warning);
+}
+
+.status-badge.approved {
+  background: linear-gradient(135deg, rgba(6, 214, 160, 0.2), rgba(6, 214, 160, 0.3));
+  color: var(--color-success);
+  border: 1px solid var(--color-success);
+}
+
+.status-badge.rejected {
+  background: linear-gradient(135deg, rgba(239, 71, 111, 0.2), rgba(255, 107, 157, 0.2));
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}
+
+.dim {
+  color: var(--color-text-dim);
+}
+
+.gold {
+  color: var(--color-gold);
+  font-weight: 700;
+  text-shadow: 0 2px 8px var(--color-gold-glow);
+}
+
+.xp {
+  color: var(--color-xp);
+  font-weight: 700;
+  text-shadow: 0 2px 8px var(--color-xp-glow);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .week-quick-nav {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .day-nav-item {
+    padding: 12px 8px;
+  }
+
+  .day-label {
+    font-size: 0.8rem;
+  }
+
+  .day-date {
+    font-size: 0.75rem;
+  }
+}
 </style>
