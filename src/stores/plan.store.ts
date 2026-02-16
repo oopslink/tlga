@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { WeeklyPlan, PlannedTaskItem } from '@/types/tasks'
-import { JsonFileStorage } from '@/services/json-file-storage'
+import { storage } from '@/services/storage-factory'
 import {
   createWeeklyPlan,
   activatePlan,
@@ -9,8 +9,6 @@ import {
 } from '@/engine/weekly-plan'
 import { currentWeek } from '@/utils/date'
 import { useProgressStore } from './progress.store'
-
-const storage = new JsonFileStorage()
 
 export const usePlanStore = defineStore('plan', () => {
   const plan = ref<WeeklyPlan | null>(null)

@@ -1,13 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { DailyLog, HomeworkTask, MathTask, JugglingTask, LanguageTask, RandomDrop } from '@/types'
-import type { StorageService } from '@/services/storage'
-import { JsonFileStorage } from '@/services/json-file-storage'
+import { storage } from '@/services/storage-factory'
 import { calcDailyRewards } from '@/engine/daily-aggregator'
 import { usePlayerStore } from './player.store'
 import { today, getISOWeek, getPreviousDates, getWeekDates } from '@/utils/date'
-
-const storage: StorageService = new JsonFileStorage()
 
 export const useDailyLogStore = defineStore('daily-log', () => {
   const currentLog = ref<DailyLog | null>(null)

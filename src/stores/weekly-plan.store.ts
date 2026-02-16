@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { WeeklyPlan, DailyGoal } from '@/types/tasks'
-import type { StorageService } from '@/services/storage'
-import { JsonFileStorage } from '@/services/json-file-storage'
+import { storage } from '@/services/storage-factory'
 import {
   createWeeklyPlan,
   addTaskToDay,
@@ -12,8 +11,6 @@ import {
   calculateWeeklyReward,
 } from '@/engine/weekly-plan'
 import { currentWeek } from '@/utils/date'
-
-const storage: StorageService = new JsonFileStorage()
 
 export const useWeeklyPlanStore = defineStore('weekly-plan', () => {
   const currentPlan = ref<WeeklyPlan | null>(null)

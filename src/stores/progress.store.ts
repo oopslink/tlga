@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { DailyProgressSheet, ProgressTaskItem } from '@/types/tasks'
-import { JsonFileStorage } from '@/services/json-file-storage'
+import { storage } from '@/services/storage-factory'
 import { usePlayerStore } from './player.store'
-
-const storage = new JsonFileStorage()
 
 function sheetPath(weekId: string, date: string) {
   return `weeks/${weekId}/progress/${date}.json`

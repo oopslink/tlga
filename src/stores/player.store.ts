@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { PlayerState } from '@/types/tasks'
-import { JsonFileStorage } from '@/services/json-file-storage'
-
-const storage = new JsonFileStorage()
+import { storage } from '@/services/storage-factory'
 
 export const usePlayerStore = defineStore('player', () => {
   const player = ref<PlayerState | null>(null)
