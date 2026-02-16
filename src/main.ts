@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
+import { injectSpeedInsights } from '@vercel/speed-insights'
 import './style.css'
 import App from './App.vue'
 import { useAuthStore } from './stores/auth.store'
@@ -43,3 +44,8 @@ router.beforeEach((to, from, next) => {
 })
 
 app.mount('#app')
+
+// Initialize Vercel Speed Insights
+if (import.meta.env.PROD) {
+  injectSpeedInsights()
+}
