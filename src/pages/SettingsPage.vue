@@ -16,6 +16,13 @@
       >
         ⚙️ 任务管理
       </div>
+      <div
+        class="tab"
+        :class="{ active: currentTab === 'password' }"
+        @click="currentTab = 'password'"
+      >
+        🔐 修改密码
+      </div>
     </div>
 
     <!-- 历史记录标签 -->
@@ -28,6 +35,11 @@
     <div v-if="currentTab === 'tasks'" class="tab-content">
       <TaskManagement />
     </div>
+
+    <!-- 修改密码标签 -->
+    <div v-if="currentTab === 'password'" class="tab-content">
+      <ChangePassword />
+    </div>
   </div>
 </template>
 
@@ -35,8 +47,9 @@
 import { ref } from 'vue'
 import HistoryListView from '@/components/settings/HistoryListView.vue'
 import TaskManagement from '@/components/settings/TaskManagement.vue'
+import ChangePassword from '@/components/settings/ChangePassword.vue'
 
-const currentTab = ref<'history' | 'tasks'>('history')
+const currentTab = ref<'history' | 'tasks' | 'password'>('history')
 </script>
 
 <style scoped>
