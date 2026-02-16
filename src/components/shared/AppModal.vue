@@ -1,15 +1,49 @@
 <template>
   <Teleport to="body">
-    <Transition name="modal">
+    <Transition name="modal-fade">
       <div v-if="state.visible" class="modal-overlay" @click.self="onCancel">
-        <div class="modal-box">
-          <h3 class="modal-title">{{ state.title }}</h3>
-          <p class="modal-message">{{ state.message }}</p>
-          <div class="modal-actions">
-            <button v-if="state.type === 'confirm'" class="modal-btn cancel" @click="onCancel">取消</button>
-            <button class="modal-btn ok" @click="onOk">确定</button>
+        <Transition name="modal-bounce" appear>
+          <div v-if="state.visible" class="modal-container">
+            <div class="modal-box" :class="`modal-${state.type}`">
+              <!-- Icon -->
+              <div class="modal-icon">
+                <div class="icon-circle">
+                  <span class="icon-emoji">{{ getIcon(state.type) }}</span>
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div class="modal-content">
+                <h3 class="modal-title">{{ state.title }}</h3>
+                <p class="modal-message">{{ state.message }}</p>
+              </div>
+
+              <!-- Actions -->
+              <div class="modal-actions">
+                <button
+                  v-if="state.type === 'confirm'"
+                  class="modal-btn btn-cancel"
+                  @click="onCancel"
+                >
+                  <span class="btn-icon">✕</span>
+                  <span>取消</span>
+                </button>
+                <button
+                  class="modal-btn btn-primary"
+                  :class="`btn-${state.type}`"
+                  @click="onOk"
+                >
+                  <span class="btn-icon">{{ state.type === 'confirm' ? '✓' : '→' }}</span>
+                  <span>{{ state.type === 'confirm' ? '确定' : '好的' }}</span>
+                </button>
+              </div>
+
+              <!-- Decorative elements -->
+              <div class="modal-decoration decoration-1"></div>
+              <div class="modal-decoration decoration-2"></div>
+            </div>
           </div>
-        </div>
+        </Transition>
       </div>
     </Transition>
   </Teleport>
@@ -17,6 +51,18 @@
 
 <script setup lang="ts">
 import { modalState as state } from '@/composables/useModal'
+import type { ModalType } from '@/composables/useModal'
+
+function getIcon(type: ModalType): string {
+  const icons = {
+    success: '🎉',
+    error: '😟',
+    warning: '⚠️',
+    info: '💡',
+    confirm: '🤔'
+  }
+  return icons[type] || '💡'
+}
 
 function close(value: boolean) {
   const resolve = state.resolve
@@ -25,94 +71,314 @@ function close(value: boolean) {
   resolve?.(value)
 }
 
-function onOk() { close(true) }
-function onCancel() { close(false) }
+function onOk() {
+  close(true)
+}
+
+function onCancel() {
+  close(false)
+}
 </script>
 
 <style scoped>
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+
+.modal-container {
+  width: 100%;
+  max-width: 440px;
+  position: relative;
 }
 
 .modal-box {
-  background: var(--color-bg-light);
-  border-radius: 16px;
-  padding: 32px;
-  min-width: 340px;
-  max-width: 480px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--color-bg-lighter);
+  background: white;
+  border-radius: 24px;
+  padding: 40px 32px 32px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.05),
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 120px rgba(255, 107, 157, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Icon */
+.modal-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  position: relative;
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+.modal-success .icon-circle { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+.modal-error .icon-circle { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.modal-warning .icon-circle { background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); }
+.modal-info .icon-circle { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+.modal-confirm .icon-circle { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.icon-emoji {
+  position: relative;
+  z-index: 1;
+  animation: iconBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes iconBounce {
+  0% { transform: scale(0) rotate(-180deg); }
+  50% { transform: scale(1.2) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Content */
+.modal-content {
+  text-align: center;
+  margin-bottom: 28px;
 }
 
 .modal-title {
-  font-size: 18px;
-  margin-bottom: 12px;
-  color: var(--color-text);
+  font-family: 'Fredoka', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
 }
 
 .modal-message {
-  color: var(--color-text-dim);
+  font-family: 'Quicksand', sans-serif;
+  font-size: 16px;
+  color: #64748b;
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin: 0;
   white-space: pre-line;
 }
 
+/* Actions */
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
+  justify-content: center;
 }
 
 .modal-btn {
+  flex: 1;
+  min-width: 120px;
   border: none;
-  border-radius: 8px;
-  padding: 10px 24px;
-  font-size: 15px;
+  border-radius: 14px;
+  padding: 14px 24px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
-.modal-btn.ok {
-  background: var(--color-primary);
+.modal-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.modal-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-icon {
+  font-size: 18px;
+  transition: transform 0.3s;
+  position: relative;
+  z-index: 1;
+}
+
+.modal-btn:hover .btn-icon {
+  transform: scale(1.2) rotate(15deg);
+}
+
+.modal-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-cancel {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+  color: #475569;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
   color: white;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
 }
 
-.modal-btn.ok:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 }
 
-.modal-btn.cancel {
-  background: var(--color-bg-lighter);
-  color: var(--color-text-dim);
+.btn-primary:active {
+  transform: translateY(0);
 }
 
-.modal-btn.cancel:hover {
-  background: var(--color-bg);
-  color: var(--color-text);
+.btn-success { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+.btn-error { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.btn-warning { background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); }
+.btn-info { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+.btn-confirm { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+
+/* Decorative elements */
+.modal-decoration {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+  pointer-events: none;
 }
 
-/* Transition */
-.modal-enter-active { transition: opacity 0.2s ease; }
-.modal-leave-active { transition: opacity 0.15s ease; }
-.modal-enter-from, .modal-leave-to { opacity: 0; }
-.modal-enter-active .modal-box { animation: modal-in 0.2s ease; }
-.modal-leave-active .modal-box { animation: modal-out 0.15s ease; }
-
-@keyframes modal-in {
-  from { transform: scale(0.92); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+.decoration-1 {
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  top: -75px;
+  right: -75px;
+  animation: float1 6s ease-in-out infinite;
 }
-@keyframes modal-out {
-  from { transform: scale(1); opacity: 1; }
-  to { transform: scale(0.92); opacity: 0; }
+
+.decoration-2 {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  bottom: -50px;
+  left: -50px;
+  animation: float2 8s ease-in-out infinite;
+}
+
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(10px, 10px) rotate(180deg); }
+}
+
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-10px, -10px) rotate(-180deg); }
+}
+
+/* Transitions */
+.modal-fade-enter-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-bounce-enter-active {
+  animation: modalBounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.modal-bounce-leave-active {
+  animation: modalBounceOut 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+}
+
+@keyframes modalBounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-100px) rotate(-10deg);
+  }
+  50% {
+    transform: scale(1.05) translateY(0) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes modalBounceOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(50px) rotate(10deg);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+  .modal-box {
+    padding: 32px 24px 24px;
+  }
+
+  .icon-circle {
+    width: 64px;
+    height: 64px;
+    font-size: 32px;
+  }
+
+  .modal-title {
+    font-size: 20px;
+  }
+
+  .modal-message {
+    font-size: 14px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-btn {
+    width: 100%;
+    min-width: unset;
+  }
 }
 </style>

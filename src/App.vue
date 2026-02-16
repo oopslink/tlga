@@ -15,6 +15,7 @@
     </div>
     <router-view />
     <AppModal />
+    <AppToast />
   </div>
 </template>
 
@@ -23,16 +24,20 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePlayerStore } from './stores/player.store'
 import { useAuthStore } from './stores/auth.store'
+import { useModal } from './composables/useModal'
 import AppModal from './components/shared/AppModal.vue'
+import AppToast from './components/shared/AppToast.vue'
 
 const router = useRouter()
 const playerStore = usePlayerStore()
 const authStore = useAuthStore()
+const { showConfirm } = useModal()
 
 onMounted(() => playerStore.load())
 
-function handleLogout() {
-  if (confirm('确定要登出吗？')) {
+async function handleLogout() {
+  const confirmed = await showConfirm('确定要登出吗？', '退出确认')
+  if (confirmed) {
     authStore.logout()
     router.push('/login')
   }
