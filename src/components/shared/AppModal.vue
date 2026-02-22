@@ -16,12 +16,20 @@
               <div class="modal-content">
                 <h3 class="modal-title">{{ state.title }}</h3>
                 <p class="modal-message">{{ state.message }}</p>
+                <input
+                  v-if="state.type === 'prompt'"
+                  ref="promptInput"
+                  class="modal-input"
+                  v-model="state.promptValue"
+                  @keyup.enter="onOk"
+                  placeholder="请输入..."
+                />
               </div>
 
               <!-- Actions -->
               <div class="modal-actions">
                 <button
-                  v-if="state.type === 'confirm'"
+                  v-if="state.type === 'confirm' || state.type === 'prompt'"
                   class="modal-btn btn-cancel"
                   @click="onCancel"
                 >
@@ -32,9 +40,10 @@
                   class="modal-btn btn-primary"
                   :class="`btn-${state.type}`"
                   @click="onOk"
+                  :disabled="state.type === 'prompt' && !state.promptValue.trim()"
                 >
-                  <span class="btn-icon">{{ state.type === 'confirm' ? '✓' : '→' }}</span>
-                  <span>{{ state.type === 'confirm' ? '确定' : '好的' }}</span>
+                  <span class="btn-icon">{{ state.type === 'confirm' || state.type === 'prompt' ? '✓' : '→' }}</span>
+                  <span>{{ state.type === 'confirm' || state.type === 'prompt' ? '确定' : '好的' }}</span>
                 </button>
               </div>
 
@@ -50,21 +59,38 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, nextTick } from 'vue'
 import { modalState as state } from '@/composables/useModal'
 import type { ModalType } from '@/composables/useModal'
 
+const promptInput = ref<HTMLInputElement | null>(null)
+
+watch(() => state.visible, (visible) => {
+  if (visible && state.type === 'prompt') {
+    nextTick(() => promptInput.value?.focus())
+  }
+})
+
 function getIcon(type: ModalType): string {
-  const icons = {
+  const icons: Record<string, string> = {
     success: '🎉',
     error: '😟',
     warning: '⚠️',
     info: '💡',
-    confirm: '🤔'
+    confirm: '🤔',
+    prompt: '✏️'
   }
   return icons[type] || '💡'
 }
 
 function close(value: boolean) {
+  if (state.type === 'prompt') {
+    const promptResolve = state.promptResolve
+    state.visible = false
+    state.promptResolve = null
+    promptResolve?.(value ? state.promptValue.trim() : null)
+    return
+  }
   const resolve = state.resolve
   state.visible = false
   state.resolve = null
@@ -176,6 +202,30 @@ function onCancel() {
   margin: 0;
   white-space: pre-line;
 }
+
+.modal-input {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 2px solid rgba(255, 107, 157, 0.2);
+  border-radius: 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 16px;
+  color: #2d3748;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.modal-input:focus {
+  border-color: var(--color-primary, #ff6b9d);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.1);
+}
+
+.modal-prompt .icon-circle { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+.btn-prompt { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
 
 /* Actions */
 .modal-actions {

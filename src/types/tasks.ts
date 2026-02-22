@@ -117,6 +117,32 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       { level: '正确率100%', gold: 4, xp: 0 },
     ],
   },
+  {
+    id: 'math-challenge',
+    category: 'academic',
+    name: '数学挑战题',
+    description: '数学挑战题（难度低于奥数难版）',
+    gold: 2,
+    xp: 5,
+    variants: [
+      { level: '完成1题', gold: 2, xp: 5 },
+      { level: '完成2题', gold: 4, xp: 10 },
+      { level: '完成3题', gold: 6, xp: 15 },
+    ],
+  },
+  {
+    id: 'math-hard',
+    category: 'academic',
+    name: '奥数难版',
+    description: '高难度奥数练习',
+    gold: 3,
+    xp: 5,
+    variants: [
+      { level: '基础完成', gold: 3, xp: 5 },
+      { level: '正确率80%+', gold: 5, xp: 10 },
+      { level: '正确率100%', gold: 7, xp: 15 },
+    ],
+  },
   // 运动类
   {
     id: 'juggling',
@@ -150,6 +176,18 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
     variants: [
       { level: '完成法语阅读', gold: 2, xp: 0 },
       { level: '额外加成', gold: 4, xp: 0 },
+    ],
+  },
+  {
+    id: 'french-advanced-reading',
+    category: 'language',
+    name: '法语高阶阅读',
+    description: '法语高级难度阅读材料',
+    gold: 3,
+    xp: 5,
+    variants: [
+      { level: '完成阅读', gold: 3, xp: 5 },
+      { level: '完成阅读+理解练习', gold: 5, xp: 10 },
     ],
   },
   {
@@ -210,6 +248,16 @@ export const LANGUAGE_COMBO_REWARDS = [
   { count: 2, gold: 2, xp: 0, label: '完成2项语言学习' },
   { count: 3, gold: 3, xp: 0, label: '完成3项语言学习' },
 ]
+
+// ==================== 每日模版 ====================
+
+export interface DailyTemplate {
+  id: string
+  name: string
+  description: string
+  tasks: PlannedTaskItem[]
+  createdAt: string
+}
 
 // ==================== 工具函数 ====================
 

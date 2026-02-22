@@ -1,6 +1,6 @@
 import { reactive } from 'vue'
 
-export type ModalType = 'success' | 'error' | 'warning' | 'info' | 'confirm'
+export type ModalType = 'success' | 'error' | 'warning' | 'info' | 'confirm' | 'prompt'
 
 export interface ModalState {
   visible: boolean
@@ -8,6 +8,8 @@ export interface ModalState {
   message: string
   type: ModalType
   resolve: ((value: boolean) => void) | null
+  promptValue: string
+  promptResolve: ((value: string | null) => void) | null
 }
 
 export const modalState = reactive<ModalState>({
@@ -16,6 +18,8 @@ export const modalState = reactive<ModalState>({
   message: '',
   type: 'info',
   resolve: null,
+  promptValue: '',
+  promptResolve: null,
 })
 
 export function useModal() {
@@ -55,12 +59,25 @@ export function useModal() {
     return showAlert(message, title, 'info')
   }
 
+  function showPrompt(message: string, title = '请输入', defaultValue = ''): Promise<string | null> {
+    return new Promise((resolve) => {
+      modalState.visible = true
+      modalState.title = title
+      modalState.message = message
+      modalState.type = 'prompt'
+      modalState.promptValue = defaultValue
+      modalState.promptResolve = resolve
+      modalState.resolve = null
+    })
+  }
+
   return {
     showAlert,
     showConfirm,
     showSuccess,
     showError,
     showWarning,
-    showInfo
+    showInfo,
+    showPrompt
   }
 }

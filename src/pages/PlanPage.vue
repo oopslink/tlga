@@ -35,6 +35,19 @@
             <input class="input" v-model="addState[dp.date].note" placeholder="备注说明" style="flex:1" />
             <button class="btn-icon btn-icon-success btn-icon-sm" @click="doAdd(dp.date)" :disabled="!addState[dp.date].taskId" title="添加任务">➕</button>
           </div>
+
+          <!-- 模版操作 -->
+          <div class="template-row">
+            <select class="select" v-model="templateState[dp.date]">
+              <option value="">选择模版...</option>
+              <option v-for="tpl in templateStore.templates" :key="tpl.id" :value="tpl.id">{{ tpl.name }}</option>
+            </select>
+            <button class="btn-link" @click="applyTemplateToDay(dp.date)" :disabled="!templateState[dp.date]">📋 应用模版</button>
+            <button class="btn-link" @click="applyTemplateToAll(dp.date)" :disabled="!templateState[dp.date]">📋 应用到所有天</button>
+            <button class="btn-link btn-link-danger" v-if="templateState[dp.date]" @click="handleDeleteTemplate(dp.date)">🗑️ 删除模版</button>
+            <span class="template-divider" v-if="dp.tasks.length > 0">|</span>
+            <button class="btn-link" v-if="dp.tasks.length > 0" @click="handleSaveAsTemplate(dp)">💾 保存为模版</button>
+          </div>
         </div>
       </div>
 
@@ -43,16 +56,18 @@
         <template v-if="planStore.isDraft">
           <button class="button" @click="handleSave">💾 保存草稿</button>
           <button class="button btn-activate" @click="handleActivate"
-                  :disabled="planStore.plan.dailyPlans.every(d => d.tasks.length === 0)">
+                  :disabled="hasNoTasks">
             🚀 激活计划（生成进度单）
           </button>
+          <p v-if="hasNoTasks" class="hint">请先展开某一天并添加任务后，才能激活计划</p>
         </template>
         <template v-else-if="planStore.isActive">
           <button class="button" @click="handleSave">💾 保存</button>
           <button class="button btn-warning" @click="handleReactivate"
-                  :disabled="planStore.plan.dailyPlans.every(d => d.tasks.length === 0)">
+                  :disabled="hasNoTasks">
             🔄 保存并重新生成进度单
           </button>
+          <p v-if="hasNoTasks" class="hint">请先添加任务后，才能重新生成进度单</p>
         </template>
         <button class="button btn-danger" @click="handleDelete">🗑️ 清空计划</button>
       </div>
@@ -65,11 +80,14 @@ import { onMounted, reactive, ref, computed } from 'vue'
 import { usePlanStore } from '@/stores/plan.store'
 import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
 import { getTaskById, getTasksByCategory } from '@/utils/tasks'
-import { CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory } from '@/types/tasks'
+import { CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory, type DailyPlan } from '@/types/tasks'
 import { formatDateCN, currentWeek } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
+import { useTemplates } from '@/composables/useTemplates'
 
-const { showAlert, showConfirm } = useModal()
+const { showAlert, showConfirm, showPrompt } = useModal()
+const templateStore = useTemplates()
+const templateState = reactive<Record<string, string>>({})
 
 const planStore = usePlanStore()
 const taskDefinitionsStore = useTaskDefinitionsStore()
@@ -77,6 +95,8 @@ const expanded = ref(new Set<string>())
 const categories: TaskCategory[] = ['academic', 'sports', 'language', 'art', 'behavior']
 
 const addState = reactive<Record<string, { taskId: string; note: string }>>({})
+
+const hasNoTasks = computed(() => planStore.plan?.dailyPlans.every(d => d.tasks.length === 0) ?? true)
 
 const statusText = computed(() => {
   const m: Record<string, string> = { draft: '草稿', active: '进行中', completed: '已完成' }
@@ -124,12 +144,49 @@ async function handleDelete() {
   await showAlert('已清空')
 }
 
+async function handleSaveAsTemplate(dp: DailyPlan) {
+  const name = await showPrompt('请输入模版名称', '保存模版')
+  if (!name) return
+  templateStore.addTemplate(name, dp.tasks)
+  await showAlert(`模版 "${name}" 已保存！`)
+}
+
+async function applyTemplateToDay(date: string) {
+  const tpl = templateStore.getTemplate(templateState[date])
+  if (!tpl || !planStore.plan) return
+  const dp = planStore.plan.dailyPlans.find(d => d.date === date)
+  if (!dp) return
+  if (dp.tasks.length > 0 && !await showConfirm('将替换当天已有的任务，确认？')) return
+  dp.tasks = structuredClone(tpl.tasks)
+  planStore.plan.updatedAt = new Date().toISOString()
+}
+
+async function applyTemplateToAll(date: string) {
+  const tpl = templateStore.getTemplate(templateState[date])
+  if (!tpl || !planStore.plan) return
+  if (!await showConfirm('将模版应用到所有天？现有任务将被替换。')) return
+  for (const dp of planStore.plan.dailyPlans) {
+    dp.tasks = structuredClone(tpl.tasks)
+  }
+  planStore.plan.updatedAt = new Date().toISOString()
+  await showAlert('已应用到所有天')
+}
+
+async function handleDeleteTemplate(date: string) {
+  if (!await showConfirm('确认删除此模版？')) return
+  templateStore.deleteTemplate(templateState[date])
+  templateState[date] = ''
+  await showAlert('模版已删除')
+}
+
 onMounted(async () => {
   taskDefinitionsStore.load()
+  templateStore.load()
   await planStore.loadWeek(currentWeek())
   if (planStore.plan) {
     for (const dp of planStore.plan.dailyPlans) {
       addState[dp.date] = { taskId: '', note: '' }
+      templateState[dp.date] = ''
     }
   }
 })
@@ -154,4 +211,11 @@ onMounted(async () => {
 .btn-warning { background:var(--color-warning); color:#1a1a2e; }
 .btn-danger { background:transparent; border:2px solid var(--color-primary); color:var(--color-primary); }
 .dim { color:var(--color-text-dim); }
+.hint { color:var(--color-warning); font-size:0.85rem; width:100%; margin-top:4px; }
+.template-row { display:flex; gap:8px; margin-top:12px; align-items:center; flex-wrap:wrap; border-top:1px dashed var(--color-bg-lighter); padding-top:12px; }
+.template-row .select { margin:0; width:auto; flex-shrink:0; min-width:140px; }
+.template-divider { color:var(--color-text-dim); opacity:0.3; }
+.btn-link-danger { color:var(--color-danger) !important; }
+.btn-link { background:none; border:none; color:var(--color-primary); cursor:pointer; font-size:0.85rem; padding:4px 8px; border-radius:6px; transition:background 0.2s; }
+.btn-link:hover { background:rgba(255,107,157,0.1); }
 </style>

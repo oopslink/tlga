@@ -91,6 +91,9 @@
                 <input type="number" class="input-sm" v-model.number="overrides[idx].xp" min="0" />
               </label>
             </div>
+            <div v-if="getEffectiveMultiplier(task.taskId, overrides[idx].result) > 1" class="multiplier-badge">
+              ×{{ getEffectiveMultiplier(task.taskId, overrides[idx].result) }} 加成
+            </div>
 
             <input class="input" v-model="overrides[idx].comment" placeholder="对此任务的批注（可选）" />
           </div>
@@ -139,6 +142,16 @@
             <div class="breakdown-item">
               <span>任务小计</span>
               <span><span class="gold">{{ previewTaskGold }}</span> 金币 / <span class="xp">{{ previewTaskXp }}</span> XP</span>
+            </div>
+            <div v-for="(task, idx) in sheet.tasks" :key="'task-'+idx"
+                 class="breakdown-item task-detail"
+                 v-if="overrides[idx] && overrides[idx].result !== '__uncompleted'">
+              <span>{{ getTaskName(task.taskId) }}
+                <span v-if="getEffectiveMultiplier(task.taskId, overrides[idx].result) > 1" class="multiplier-inline">
+                  ×{{ getEffectiveMultiplier(task.taskId, overrides[idx].result) }}
+                </span>
+              </span>
+              <span><span class="gold">{{ overrides[idx].gold }}</span> 金币</span>
             </div>
             <div v-if="bonus.multiplier !== 1" class="breakdown-item">
               <span>倍率 ×{{ bonus.multiplier }}</span>
@@ -290,6 +303,18 @@ function getTaskName(id: string) { return getTaskById(id)?.name ?? id }
 function getCatIcon(id: string) { const t = getTaskById(id); return t ? CATEGORY_ICONS[t.category] : '' }
 function hasVariants(id: string) { const t = getTaskById(id); return t?.variants && t.variants.length > 0 }
 function getVariants(id: string): TaskVariant[] { return getTaskById(id)?.variants ?? [] }
+
+/** 计算任务变体相对于基础奖励的有效倍率 */
+function getEffectiveMultiplier(taskId: string, result: string): number {
+  if (result === '__uncompleted' || result === '__completed') return 1
+  const task = getTaskById(taskId)
+  if (!task || !task.variants) return 1
+  const variant = task.variants.find(v => v.level === result)
+  if (!variant || task.gold === 0) return 1
+  const multiplier = variant.gold / task.gold
+  // Round to 1 decimal place
+  return Math.round(multiplier * 10) / 10
+}
 
 function formatTime(iso: string) {
   const d = new Date(iso)
@@ -965,6 +990,34 @@ onMounted(() => {
   color: var(--color-xp);
   font-weight: 700;
   text-shadow: 0 2px 8px var(--color-xp-glow);
+}
+
+.multiplier-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(255, 182, 39, 0.2), rgba(255, 218, 118, 0.3));
+  color: var(--color-gold);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  border: 1px solid var(--color-gold);
+  margin-top: 8px;
+}
+
+.breakdown-item.task-detail {
+  font-size: 0.85rem;
+  padding: 6px 0 6px 16px;
+  opacity: 0.85;
+  border-bottom: 1px dashed rgba(255, 182, 39, 0.15);
+}
+
+.multiplier-inline {
+  color: var(--color-gold);
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.8rem;
+  margin-left: 4px;
 }
 
 /* 响应式 */
