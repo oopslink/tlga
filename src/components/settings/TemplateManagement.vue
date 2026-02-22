@@ -33,7 +33,6 @@
           <div v-for="(task, idx) in tpl.tasks" :key="idx" class="template-task-item">
             <span class="task-cat">{{ getCatIcon(task.taskId) }}</span>
             <span>{{ getTaskName(task.taskId) }}</span>
-            <span v-if="task.targetVariant" class="variant-tag">{{ task.targetVariant }}</span>
             <span v-if="task.note" class="note-tag">{{ task.note }}</span>
           </div>
         </div>
@@ -80,15 +79,7 @@
               <div v-for="(task, idx) in formData.tasks" :key="idx" class="task-edit-row">
                 <span class="task-cat">{{ getCatIcon(task.taskId) }}</span>
                 <span class="task-edit-name">{{ getTaskName(task.taskId) }}</span>
-                <select
-                  v-if="hasVariants(task.taskId)"
-                  class="select select-sm"
-                  v-model="formData.tasks[idx].targetVariant"
-                  :disabled="dialogMode === 'view'"
-                >
-                  <option value="">默认</option>
-                  <option v-for="v in getVariants(task.taskId)" :key="v.level" :value="v.level">{{ v.level }}</option>
-                </select>
+                <!-- 模版编辑/查看中不展示和编辑“完成程度”字段 -->
                 <input
                   class="input input-sm"
                   v-model="formData.tasks[idx].note"
@@ -189,7 +180,11 @@ function showAddDialog() {
 function viewTemplate(tpl: DailyTemplate) {
   dialogMode.value = 'view'
   editingId.value = tpl.id
-  formData.value = { name: tpl.name, description: tpl.description ?? '', tasks: JSON.parse(JSON.stringify(tpl.tasks)) }
+  formData.value = {
+    name: tpl.name,
+    description: tpl.description ?? '',
+    tasks: (tpl.tasks || []).map(t => ({ taskId: t.taskId, note: t.note })) as PlannedTaskItem[],
+  }
   dialogVisible.value = true
 }
 
@@ -197,7 +192,11 @@ function editTemplate(tpl: DailyTemplate) {
   dialogMode.value = 'edit'
   editingId.value = tpl.id
   addTaskId.value = ''
-  formData.value = { name: tpl.name, description: tpl.description ?? '', tasks: JSON.parse(JSON.stringify(tpl.tasks)) }
+  formData.value = {
+    name: tpl.name,
+    description: tpl.description ?? '',
+    tasks: (tpl.tasks || []).map(t => ({ taskId: t.taskId, note: t.note })) as PlannedTaskItem[],
+  }
   dialogVisible.value = true
 }
 

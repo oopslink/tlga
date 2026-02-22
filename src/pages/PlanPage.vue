@@ -40,13 +40,10 @@
           <div class="template-row">
             <select class="select" v-model="templateState[dp.date]">
               <option value="">选择模版...</option>
-              <option v-for="tpl in templateStore.templates" :key="tpl.id" :value="tpl.id">{{ tpl.name }}</option>
+              <option v-for="tpl in templateStore.templates.value" :key="tpl.id" :value="tpl.id">{{ tpl.name }}</option>
             </select>
             <button class="btn-link" @click="applyTemplateToDay(dp.date)" :disabled="!templateState[dp.date]">📋 应用模版</button>
-            <button class="btn-link" @click="applyTemplateToAll(dp.date)" :disabled="!templateState[dp.date]">📋 应用到所有天</button>
-            <button class="btn-link btn-link-danger" v-if="templateState[dp.date]" @click="handleDeleteTemplate(dp.date)">🗑️ 删除模版</button>
             <span class="template-divider" v-if="dp.tasks.length > 0">|</span>
-            <button class="btn-link" v-if="dp.tasks.length > 0" @click="handleSaveAsTemplate(dp)">💾 保存为模版</button>
           </div>
         </div>
       </div>
@@ -157,7 +154,9 @@ async function applyTemplateToDay(date: string) {
   const dp = planStore.plan.dailyPlans.find(d => d.date === date)
   if (!dp) return
   if (dp.tasks.length > 0 && !await showConfirm('将替换当天已有的任务，确认？')) return
-  dp.tasks = structuredClone(tpl.tasks)
+  // replace array contents to ensure reactivity
+  const clonedTasks = JSON.parse(JSON.stringify(tpl.tasks || [])) as any[]
+  dp.tasks.splice(0, dp.tasks.length, ...(clonedTasks))
   planStore.plan.updatedAt = new Date().toISOString()
 }
 
@@ -165,8 +164,9 @@ async function applyTemplateToAll(date: string) {
   const tpl = templateStore.getTemplate(templateState[date])
   if (!tpl || !planStore.plan) return
   if (!await showConfirm('将模版应用到所有天？现有任务将被替换。')) return
+  const clonedTasksAll = JSON.parse(JSON.stringify(tpl.tasks || [])) as any[]
   for (const dp of planStore.plan.dailyPlans) {
-    dp.tasks = structuredClone(tpl.tasks)
+    dp.tasks.splice(0, dp.tasks.length, ...(clonedTasksAll))
   }
   planStore.plan.updatedAt = new Date().toISOString()
   await showAlert('已应用到所有天')
