@@ -113,6 +113,36 @@
           </div>
         </div>
 
+        <!-- 反思与创造（只读展示） -->
+        <div v-if="sheet.reflection || (isSunday && sheet.weeklyReview)" class="reflection-section">
+          <h3>🧠 锚点三：反思与创造</h3>
+          <div v-if="sheet.reflection" class="reflection-block">
+            <div class="reflection-type-row">
+              <span class="reflection-icon">{{ getReflectionIcon(sheet.reflection.type) }}</span>
+              <span class="reflection-label">{{ getReflectionLabel(sheet.reflection.type) }}</span>
+              <span class="gold">+{{ sheet.reflection.goldEarned }} 金</span>
+            </div>
+            <div v-if="sheet.reflection.methodLog" class="method-log-view">
+              <p><strong>问题：</strong>{{ sheet.reflection.methodLog.problem }}</p>
+              <p><strong>方法：</strong>{{ sheet.reflection.methodLog.method }}</p>
+              <p><strong>原理：</strong>{{ sheet.reflection.methodLog.principle }}</p>
+            </div>
+            <p v-else class="reflection-content">{{ sheet.reflection.content }}</p>
+          </div>
+          <div v-else class="dim">未填写反思内容</div>
+
+          <div v-if="sheet.weeklyReview?.completed" class="weekly-review-block">
+            <h4>📖 本周回顾 <span class="gold">+{{ sheet.weeklyReview.goldEarned }} 金</span></h4>
+            <p><strong>最骄傲：</strong>{{ sheet.weeklyReview.answers.proudest }}</p>
+            <p><strong>新发现：</strong>{{ sheet.weeklyReview.answers.discovery }}</p>
+            <p><strong>下周目标：</strong>{{ sheet.weeklyReview.answers.nextWeek }}</p>
+          </div>
+
+          <div v-if="sheet.allAnchorsCompleted" class="all-anchors-badge">
+            🏆 三锚点全完成！+{{ sheet.allAnchorsBonusGold ?? 2 }} 金 +{{ sheet.allAnchorsBonusXp ?? 10 }} XP
+          </div>
+        </div>
+
         <!-- 额外加成 -->
         <div v-if="isReviewable" class="card bonus-card">
           <h3>额外加成</h3>
@@ -220,9 +250,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProgressStore } from '@/stores/progress.store'
 import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
 import { getTaskById, getTaskReward } from '@/utils/tasks'
-import { CATEGORY_ICONS, type TaskVariant } from '@/types/tasks'
+import { CATEGORY_ICONS, type TaskVariant, type ReflectionType } from '@/types/tasks'
 import { formatDateCN, today, currentWeek, getWeekDates } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
+import { REFLECTION_TYPE_LABELS, REFLECTION_TYPE_ICONS } from '@/engine/reflection-anchor'
 
 const { showAlert, showConfirm } = useModal()
 
@@ -315,6 +346,16 @@ function getEffectiveMultiplier(taskId: string, result: string): number {
   // Round to 1 decimal place
   return Math.round(multiplier * 10) / 10
 }
+
+function getReflectionIcon(type: ReflectionType) { return REFLECTION_TYPE_ICONS[type] }
+function getReflectionLabel(type: ReflectionType) { return REFLECTION_TYPE_LABELS[type] }
+
+function isSundayDate(date: string) {
+  const d = new Date(date + 'T00:00:00')
+  return d.getDay() === 0
+}
+
+const isSunday = computed(() => isSundayDate(selectedDate.value))
 
 function formatTime(iso: string) {
   const d = new Date(iso)
@@ -1018,6 +1059,82 @@ onMounted(() => {
   font-family: 'Fredoka', sans-serif;
   font-size: 0.8rem;
   margin-left: 4px;
+}
+
+/* 反思区块 */
+.reflection-section {
+  background: var(--color-bg-card);
+  border: 2px solid rgba(94, 174, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.reflection-section h3 {
+  margin: 0 0 16px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+}
+
+.reflection-section h4 {
+  margin: 0 0 10px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1rem;
+}
+
+.reflection-block {
+  background: var(--color-bg-elevated);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.reflection-type-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.reflection-icon { font-size: 1.3rem; }
+.reflection-label { flex: 1; }
+
+.method-log-view p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.reflection-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.weekly-review-block {
+  background: var(--color-bg-elevated);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 182, 39, 0.2);
+}
+
+.weekly-review-block p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.all-anchors-badge {
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(255, 182, 39, 0.15), rgba(255, 218, 118, 0.2));
+  border: 1px solid var(--color-gold);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  color: var(--color-gold);
+  text-align: center;
 }
 
 /* 响应式 */

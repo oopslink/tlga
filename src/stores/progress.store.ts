@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { DailyProgressSheet, ProgressTaskItem } from '@/types/tasks'
+import type { DailyProgressSheet, ProgressTaskItem, ReflectionType, MethodLog } from '@/types/tasks'
 import { storage } from '@/services/storage-factory'
 import { usePlayerStore } from './player.store'
+import { useThinkingArchiveStore } from './thinking-archive.store'
+import { checkAllAnchorsCompleted, ALL_ANCHORS_BONUS_GOLD, ALL_ANCHORS_BONUS_XP } from '@/engine/all-anchors-bonus'
+import type { ThinkingArchiveEntry } from '@/types'
 
 function sheetPath(weekId: string, date: string) {
   return `weeks/${weekId}/progress/${date}.json`
@@ -55,6 +58,16 @@ export const useProgressStore = defineStore('progress', () => {
     task.kidComment = kidComment
   }
 
+  function updateReflection(reflection: DailyProgressSheet['reflection']) {
+    if (!currentSheet.value) return
+    currentSheet.value.reflection = reflection
+  }
+
+  function updateWeeklyReview(review: DailyProgressSheet['weeklyReview']) {
+    if (!currentSheet.value) return
+    currentSheet.value.weeklyReview = review
+  }
+
   async function submitSheet() {
     if (!currentSheet.value) return
     currentSheet.value.status = 'submitted'
@@ -94,6 +107,22 @@ export const useProgressStore = defineStore('progress', () => {
     totalGold += s.bonusGold ?? 0
     totalXp += s.bonusXp ?? 0
 
+    // 反思与创造金币
+    totalGold += s.reflection?.goldEarned ?? 0
+
+    // 三锚点全完成奖励
+    const allAnchors = checkAllAnchorsCompleted(s)
+    s.allAnchorsCompleted = allAnchors
+    if (allAnchors) {
+      s.allAnchorsBonusGold = ALL_ANCHORS_BONUS_GOLD
+      s.allAnchorsBonusXp = ALL_ANCHORS_BONUS_XP
+      totalGold += ALL_ANCHORS_BONUS_GOLD
+      totalXp += ALL_ANCHORS_BONUS_XP
+    }
+
+    // 周日回顾金币
+    totalGold += s.weeklyReview?.goldEarned ?? 0
+
     s.totalGold = totalGold
     s.totalXp = totalXp
     s.settled = true
@@ -108,6 +137,21 @@ export const useProgressStore = defineStore('progress', () => {
     await playerStore.load()
     playerStore.addRewards(totalGold, totalXp)
     await playerStore.save()
+
+    // 写入思维档案
+    if (s.reflection?.content?.trim()) {
+      const archiveStore = useThinkingArchiveStore()
+      const entry: ThinkingArchiveEntry = {
+        id: `${s.date}-reflection`,
+        date: s.date,
+        weekId: s.weekId,
+        type: s.reflection.type,
+        content: s.reflection.content,
+        methodLog: s.reflection.methodLog,
+        goldEarned: s.reflection.goldEarned,
+      }
+      await archiveStore.addEntry(s.weekId, entry)
+    }
   }
 
   /** 驳回 */
@@ -122,7 +166,7 @@ export const useProgressStore = defineStore('progress', () => {
   return {
     currentSheet, weekSheets, loading, error,
     loadSheet, loadWeekSheets, saveSheet,
-    updateTaskProgress, submitSheet,
+    updateTaskProgress, updateReflection, updateWeeklyReview, submitSheet,
     overrideTask, approveSheet, rejectSheet,
   }
 })

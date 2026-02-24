@@ -12,13 +12,13 @@ import type {
 
 // ==================== Homework Rewards ====================
 export const HOMEWORK_GOLD: Record<HomeworkQuality, number> = {
-  perfect: 20,
-  good: 15,
-  ok: 10,
+  perfect: 4,
+  good: 3,
+  ok: 2,
   incomplete: 0,
 }
 
-export const HOMEWORK_SELF_CHECK_BONUS = 5 // extra gold for self-checking
+export const HOMEWORK_SELF_CHECK_BONUS = 1 // extra gold for self-checking
 
 export const HOMEWORK_XP: Record<HomeworkQuality, number> = {
   perfect: 15,
@@ -28,12 +28,13 @@ export const HOMEWORK_XP: Record<HomeworkQuality, number> = {
 }
 
 // ==================== Math Rewards ====================
+// 五模式：普通(basic) / 火焰(medium) / 星光(hard) / 钻石(competition) / 王者(olympiad)
 export const MATH_BASE_GOLD: Record<MathDifficulty, number> = {
-  basic: 5,
-  medium: 10,
-  hard: 15,
-  competition: 25,
-  olympiad: 40,
+  basic: 1,
+  medium: 2,
+  hard: 3,
+  competition: 4,
+  olympiad: 5,
 }
 
 export const MATH_BASE_XP: Record<MathDifficulty, number> = {
@@ -48,12 +49,13 @@ export const MATH_ALL_CORRECT_BONUS_GOLD = 10
 export const MATH_ALL_CORRECT_BONUS_XP = 10
 
 // ==================== Math Multiplier ====================
+// 五模式：普通(basic) / 火焰(medium) / 星光(hard) / 钻石(competition) / 王者(olympiad)
 export const MATH_MULTIPLIER: Record<MathDifficulty, number> = {
   basic: 1.0,
-  medium: 1.2,
-  hard: 1.5,
-  competition: 1.8,
-  olympiad: 2.0,
+  medium: 1.5,
+  hard: 2.0,
+  competition: 2.5,
+  olympiad: 3.0,
 }
 
 export const MATH_MULTIPLIER_LV10_BONUS = 0.2
@@ -69,9 +71,9 @@ export const JUGGLING_NEW_RECORD_STARS = 1
 
 // ==================== Language Rewards ====================
 export const LANGUAGE_GOLD = {
-  'english-reading': 10,
-  'english-words': 10,
-  french: 15,
+  'english-reading': 1,
+  'english-words': 1,
+  french: 4,
 }
 
 export const LANGUAGE_XP = {
@@ -80,26 +82,26 @@ export const LANGUAGE_XP = {
   french: 15,
 }
 
-// Combo bonus: complete all 3 language types in one day
-export const LANGUAGE_COMBO_GOLD = 20
-export const LANGUAGE_COMBO_XP = 15
-export const LANGUAGE_COMBO_STARS = 1
+// Combo bonus: complete 2 or 3 language tasks in one day
+export const LANGUAGE_COMBO_GOLD = 3
+export const LANGUAGE_COMBO_XP = 0
+export const LANGUAGE_COMBO_STARS = 0
 
-// French consecutive day bonus (3 days)
+// French consecutive day bonus (3 days) → +2金，无星
 export const FRENCH_STREAK_DAYS = 3
-export const FRENCH_STREAK_GOLD = 30
-export const FRENCH_STREAK_STARS = 2
+export const FRENCH_STREAK_GOLD = 2
+export const FRENCH_STREAK_STARS = 0
 
-// French weekly bonus (5 times in a week)
+// French weekly bonus (5 times in a week) → +1星，无金
 export const FRENCH_WEEKLY_COUNT = 5
-export const FRENCH_WEEKLY_GOLD = 50
-export const FRENCH_WEEKLY_STARS = 3
+export const FRENCH_WEEKLY_GOLD = 0
+export const FRENCH_WEEKLY_STARS = 1
 
 // ==================== Random Drop Rewards ====================
 export const RANDOM_DROP_GOLD = {
-  piano: 15,
-  handwriting: 10,
-  social: 10,
+  piano: 1,
+  handwriting: 1,
+  social: 2,
 }
 
 export const RANDOM_DROP_XP = {

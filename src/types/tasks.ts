@@ -43,6 +43,16 @@ export interface PlannedTaskItem {
   note: string                  // 说明文本/备注
 }
 
+// ==================== 反思类型 ====================
+
+export type ReflectionType = 'discovery' | 'open-question' | 'method-log'
+
+export interface MethodLog {
+  problem: string
+  method: string
+  principle: string
+}
+
 // ==================== 每日进度单（系统生成，小学霸填写） ====================
 
 export type ProgressSheetStatus = 'pending' | 'submitted' | 'approved' | 'rejected'
@@ -55,6 +65,22 @@ export interface DailyProgressSheet {
   submittedAt?: string
   reviewedAt?: string
   reviewComment?: string        // 审批员整体评语
+  // 锚点三：反思与创造
+  reflection?: {
+    type: ReflectionType
+    content: string
+    methodLog?: MethodLog
+    goldEarned: number          // 2 或 3
+  }
+  allAnchorsCompleted?: boolean
+  allAnchorsBonusGold?: number  // +2
+  allAnchorsBonusXp?: number    // +10
+  // 周日回顾
+  weeklyReview?: {
+    completed: boolean
+    answers: { proudest: string; discovery: string; nextWeek: string }
+    goldEarned: number          // 5
+  }
   // 额外加成（审批员设置）
   bonusMultiplier?: number      // 整体倍率（如 1.5 表示 ×1.5）
   bonusGold?: number            // 额外金币
@@ -170,13 +196,9 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
     id: 'french-reading',
     category: 'language',
     name: '法语阅读',
-    description: '完成法语阅读',
-    gold: 2,
+    description: '完成法语阅读（固定4金）',
+    gold: 4,
     xp: 0,
-    variants: [
-      { level: '完成法语阅读', gold: 2, xp: 0 },
-      { level: '额外加成', gold: 4, xp: 0 },
-    ],
   },
   {
     id: 'french-advanced-reading',

@@ -92,6 +92,106 @@
         </div>
       </div>
 
+      <!-- 锚点三：反思与创造 -->
+      <div class="anchor-card">
+        <div class="anchor-header">
+          <span class="anchor-icon">🧠</span>
+          <h3>锚点三：反思与创造</h3>
+          <span class="anchor-badge">三选一 · 每日必做</span>
+        </div>
+
+        <div v-if="isEditable">
+          <div class="reflection-types">
+            <label
+              v-for="rt in reflectionTypes"
+              :key="rt.type"
+              class="reflection-type-option"
+              :class="{ selected: reflectionType === rt.type }"
+            >
+              <input type="radio" :value="rt.type" v-model="reflectionType" style="display:none" />
+              <span class="rt-icon">{{ rt.icon }}</span>
+              <span class="rt-name">{{ rt.label }}</span>
+              <span class="rt-gold">+{{ rt.gold }} 金</span>
+            </label>
+          </div>
+
+          <template v-if="reflectionType">
+            <!-- 方法日志：三行结构化输入 -->
+            <div v-if="reflectionType === 'method-log'" class="method-log-form">
+              <div class="form-group">
+                <label class="label">问题是什么？</label>
+                <input class="input" v-model="methodLogProblem" placeholder="描述你遇到的问题..." />
+              </div>
+              <div class="form-group">
+                <label class="label">用了什么方法？</label>
+                <input class="input" v-model="methodLogMethod" placeholder="描述你的解题方法..." />
+              </div>
+              <div class="form-group">
+                <label class="label">背后的原理是什么？</label>
+                <input class="input" v-model="methodLogPrinciple" placeholder="总结核心原理..." />
+              </div>
+            </div>
+            <!-- 其他类型：单个文本域 -->
+            <div v-else class="form-group">
+              <label class="label">{{ reflectionType === 'discovery' ? '我发现了什么？' : '我想到了什么问题？' }}</label>
+              <textarea class="input" v-model="reflectionContent" rows="3" placeholder="写下你的想法..."></textarea>
+            </div>
+          </template>
+        </div>
+
+        <!-- 只读模式 -->
+        <div v-else-if="sheet.reflection" class="reflection-readonly">
+          <div class="reflection-type-tag">
+            <span>{{ getReflectionIcon(sheet.reflection.type) }}</span>
+            <span>{{ getReflectionLabel(sheet.reflection.type) }}</span>
+            <span class="gold">+{{ sheet.reflection.goldEarned }} 金</span>
+          </div>
+          <div v-if="sheet.reflection.methodLog" class="method-log-readonly">
+            <p><strong>问题：</strong>{{ sheet.reflection.methodLog.problem }}</p>
+            <p><strong>方法：</strong>{{ sheet.reflection.methodLog.method }}</p>
+            <p><strong>原理：</strong>{{ sheet.reflection.methodLog.principle }}</p>
+          </div>
+          <p v-else>{{ sheet.reflection.content }}</p>
+          <div v-if="sheet.allAnchorsCompleted" class="anchors-bonus-tag">
+            🏆 三锚点全完成！+{{ sheet.allAnchorsBonusGold }} 金 +{{ sheet.allAnchorsBonusXp }} XP
+          </div>
+        </div>
+        <div v-else class="dim" style="padding:12px 0">未填写反思内容</div>
+      </div>
+
+      <!-- 周日本周回顾 -->
+      <div v-if="isSunday" class="anchor-card weekly-review-card">
+        <div class="anchor-header">
+          <span class="anchor-icon">📖</span>
+          <h3>本周回顾</h3>
+          <span class="anchor-badge">周日限定 · +5 金</span>
+        </div>
+
+        <div v-if="isEditable">
+          <div class="form-group">
+            <label class="label">本周最骄傲的事是什么？</label>
+            <textarea class="input" v-model="reviewProudest" rows="2" placeholder="写下让你最自豪的事..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="label">本周有什么新发现？</label>
+            <textarea class="input" v-model="reviewDiscovery" rows="2" placeholder="写下你的新发现..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="label">下周想挑战什么？</label>
+            <textarea class="input" v-model="reviewNextWeek" rows="2" placeholder="设定下周的小目标..."></textarea>
+          </div>
+        </div>
+
+        <!-- 只读模式 -->
+        <div v-else-if="sheet.weeklyReview?.completed" class="reflection-readonly">
+          <p><strong>最骄傲：</strong>{{ sheet.weeklyReview.answers.proudest }}</p>
+          <p><strong>新发现：</strong>{{ sheet.weeklyReview.answers.discovery }}</p>
+          <p><strong>下周目标：</strong>{{ sheet.weeklyReview.answers.nextWeek }}</p>
+          <span class="gold">+{{ sheet.weeklyReview.goldEarned }} 金</span>
+        </div>
+        <div v-else class="dim" style="padding:12px 0">未填写本周回顾</div>
+      </div>
+
       <!-- 结算预览 -->
       <div v-if="sheet.settled" class="reward-preview">
         <h3>结算结果</h3>
@@ -130,15 +230,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProgressStore } from '@/stores/progress.store'
 import { usePlanStore } from '@/stores/plan.store'
 import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
 import { getTaskById } from '@/utils/tasks'
-import { CATEGORY_ICONS, type TaskVariant } from '@/types/tasks'
+import { CATEGORY_ICONS, type TaskVariant, type ReflectionType } from '@/types/tasks'
 import { formatDateCN, today, currentWeek, getWeekDates } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
+import {
+  REFLECTION_GOLD,
+  REFLECTION_TYPE_LABELS,
+  REFLECTION_TYPE_ICONS,
+  validateMethodLog,
+  calcReflectionGold,
+} from '@/engine/reflection-anchor'
 
 const { showAlert, showConfirm } = useModal()
 
@@ -152,6 +259,100 @@ const weekId = currentWeek()
 const weekDates = getWeekDates(weekId)
 
 const selectedDate = computed(() => (route.params.date as string) || today())
+
+// ==================== 反思与创造 ====================
+
+const reflectionType = ref<ReflectionType | null>(null)
+const reflectionContent = ref('')
+const methodLogProblem = ref('')
+const methodLogMethod = ref('')
+const methodLogPrinciple = ref('')
+
+const reflectionTypes = [
+  { type: 'discovery' as ReflectionType, icon: '💡', label: '发现时刻', gold: REFLECTION_GOLD['discovery'] },
+  { type: 'open-question' as ReflectionType, icon: '❓', label: '开放问题', gold: REFLECTION_GOLD['open-question'] },
+  { type: 'method-log' as ReflectionType, icon: '📝', label: '方法日志', gold: REFLECTION_GOLD['method-log'] },
+]
+
+function getReflectionIcon(type: ReflectionType) { return REFLECTION_TYPE_ICONS[type] }
+function getReflectionLabel(type: ReflectionType) { return REFLECTION_TYPE_LABELS[type] }
+
+function isSundayDate(date: string) {
+  const d = new Date(date + 'T00:00:00')
+  return d.getDay() === 0
+}
+
+const isSunday = computed(() => isSundayDate(selectedDate.value))
+
+// ==================== 周日回顾 ====================
+
+const reviewProudest = ref('')
+const reviewDiscovery = ref('')
+const reviewNextWeek = ref('')
+
+function initReflectionFromSheet() {
+  const s = progressStore.currentSheet
+  if (!s) return
+  if (s.reflection) {
+    reflectionType.value = s.reflection.type
+    if (s.reflection.methodLog) {
+      methodLogProblem.value = s.reflection.methodLog.problem
+      methodLogMethod.value = s.reflection.methodLog.method
+      methodLogPrinciple.value = s.reflection.methodLog.principle
+    } else {
+      reflectionContent.value = s.reflection.content
+    }
+  } else {
+    reflectionType.value = null
+    reflectionContent.value = ''
+    methodLogProblem.value = ''
+    methodLogMethod.value = ''
+    methodLogPrinciple.value = ''
+  }
+  if (s.weeklyReview) {
+    reviewProudest.value = s.weeklyReview.answers.proudest
+    reviewDiscovery.value = s.weeklyReview.answers.discovery
+    reviewNextWeek.value = s.weeklyReview.answers.nextWeek
+  } else {
+    reviewProudest.value = ''
+    reviewDiscovery.value = ''
+    reviewNextWeek.value = ''
+  }
+}
+
+function buildReflectionData() {
+  if (!reflectionType.value) return undefined
+  if (reflectionType.value === 'method-log') {
+    const log = { problem: methodLogProblem.value, method: methodLogMethod.value, principle: methodLogPrinciple.value }
+    const content = `问题：${log.problem} / 方法：${log.method} / 原理：${log.principle}`
+    return {
+      type: reflectionType.value,
+      content,
+      methodLog: log,
+      goldEarned: calcReflectionGold(reflectionType.value),
+    }
+  }
+  return {
+    type: reflectionType.value,
+    content: reflectionContent.value,
+    goldEarned: calcReflectionGold(reflectionType.value),
+  }
+}
+
+function buildWeeklyReviewData() {
+  if (!isSunday.value) return undefined
+  const hasContent = reviewProudest.value.trim() || reviewDiscovery.value.trim() || reviewNextWeek.value.trim()
+  if (!hasContent) return undefined
+  return {
+    completed: true,
+    answers: {
+      proudest: reviewProudest.value,
+      discovery: reviewDiscovery.value,
+      nextWeek: reviewNextWeek.value,
+    },
+    goldEarned: 5,
+  }
+}
 
 // 用于存储所有进度单状态
 const sheetsMap = computed(() => {
@@ -224,20 +425,23 @@ function onVariantChange(taskIdx: number, value: string) {
 
 async function loadData() {
   await planStore.loadWeek(weekId)
-  // 加载整周的进度单状态，用于显示导航状态
   await progressStore.loadWeekSheets(weekId, weekDates)
-  // 加载当前选中日期的详细进度单
   await progressStore.loadSheet(weekId, selectedDate.value)
+  initReflectionFromSheet()
 }
 
 async function handleSave() {
   if (!sheet.value) return
+  progressStore.updateReflection(buildReflectionData())
+  progressStore.updateWeeklyReview(buildWeeklyReviewData())
   await progressStore.saveSheet(sheet.value)
   await showAlert('已暂存')
 }
 
 async function handleSubmit() {
   if (!await showConfirm('确认提交？提交后需要审批员审批。')) return
+  progressStore.updateReflection(buildReflectionData())
+  progressStore.updateWeeklyReview(buildWeeklyReviewData())
   await progressStore.submitSheet()
   await showAlert('已提交，等待审批')
 }
@@ -582,6 +786,129 @@ onMounted(() => {
   background: rgba(255, 107, 157, 0.05);
 }
 
+/* 锚点卡片 */
+.anchor-card {
+  background: var(--color-bg-card);
+  border: 2px solid rgba(94, 174, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  animation: slideUp 0.5s ease-out;
+}
+
+.weekly-review-card {
+  border-color: rgba(255, 182, 39, 0.3);
+}
+
+.anchor-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.anchor-header h3 {
+  margin: 0;
+  flex: 1;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+}
+
+.anchor-icon {
+  font-size: 1.4rem;
+}
+
+.anchor-badge {
+  background: linear-gradient(135deg, rgba(94, 174, 255, 0.15), rgba(94, 174, 255, 0.25));
+  color: var(--color-xp);
+  border: 1px solid var(--color-xp);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  white-space: nowrap;
+}
+
+.reflection-types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.reflection-type-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
+  background: var(--color-bg-elevated);
+  border: 2px solid rgba(94, 174, 255, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+}
+
+.reflection-type-option:hover {
+  border-color: var(--color-xp);
+  transform: translateY(-2px);
+}
+
+.reflection-type-option.selected {
+  background: linear-gradient(135deg, rgba(94, 174, 255, 0.15), rgba(94, 174, 255, 0.25));
+  border-color: var(--color-xp);
+  box-shadow: 0 4px 12px rgba(94, 174, 255, 0.2);
+}
+
+.rt-icon { font-size: 1.5rem; }
+.rt-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+}
+.rt-gold {
+  font-size: 0.8rem;
+  color: var(--color-gold);
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.method-log-form { margin-top: 4px; }
+
+.reflection-readonly {
+  padding: 12px;
+  background: var(--color-bg-elevated);
+  border-radius: 10px;
+}
+
+.reflection-type-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+}
+
+.method-log-readonly p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.anchors-bonus-tag {
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, rgba(255, 182, 39, 0.15), rgba(255, 218, 118, 0.2));
+  border: 1px solid var(--color-gold);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  color: var(--color-gold);
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .week-quick-nav {
@@ -599,6 +926,11 @@ onMounted(() => {
 
   .day-date {
     font-size: 0.75rem;
+  }
+
+  .reflection-types {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 }
 </style>

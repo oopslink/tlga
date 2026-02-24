@@ -16,6 +16,7 @@ const router = createRouter({
     { path: '/approve/:date?', component: () => import('./pages/ApprovePage.vue'), meta: { requiresAuth: true } },
     { path: '/settings', component: () => import('./pages/SettingsPage.vue'), meta: { requiresAuth: true } },
     { path: '/history/:weekId', component: () => import('./pages/HistoryPage.vue'), meta: { requiresAuth: true } },
+    { path: '/thinking-archive', component: () => import('./pages/ThinkingArchivePage.vue'), meta: { requiresAuth: true } },
   ],
 })
 

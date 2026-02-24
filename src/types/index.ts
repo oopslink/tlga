@@ -1,3 +1,6 @@
+import type { ReflectionType, MethodLog } from './tasks'
+export type { ReflectionType, MethodLog }
+
 // ==================== Currency ====================
 export interface Currency {
   gold: number
@@ -233,6 +236,27 @@ export interface StreakReward {
   gold: number
   stars: number
   special?: string
+}
+
+// ==================== Thinking Archive ====================
+
+export interface ThinkingArchiveEntry {
+  id: string
+  date: string
+  weekId: string
+  type: ReflectionType
+  content: string
+  methodLog?: MethodLog
+  goldEarned: number
+  linkedDate?: string
+}
+
+// ==================== Weekly Review ====================
+
+export interface WeeklyReview {
+  completed: boolean
+  answers: { proudest: string; discovery: string; nextWeek: string }
+  goldEarned: number  // 5金
 }
 
 // ==================== UI State ====================

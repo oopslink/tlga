@@ -62,6 +62,29 @@
         <div class="stat-box"><span>周经验</span><span class="stat-value xp">{{ weekXp }}</span></div>
       </div>
     </div>
+
+    <!-- 思维档案 -->
+    <div class="card">
+      <div class="archive-header-row">
+        <h2>📚 思维档案</h2>
+        <router-link to="/thinking-archive" class="view-all">查看全部</router-link>
+      </div>
+      <div v-if="archiveStore.loading" class="loading">加载中...</div>
+      <div v-else-if="recentEntries.length === 0">
+        <p class="dim">暂无反思记录，开始每日反思吧！</p>
+      </div>
+      <div v-else>
+        <div v-for="entry in recentEntries" :key="entry.id" class="archive-entry">
+          <span class="archive-icon">{{ getArchiveIcon(entry.type) }}</span>
+          <div class="archive-content">
+            <span class="archive-type">{{ getArchiveLabel(entry.type) }}</span>
+            <span class="archive-date dim">{{ formatDate(entry.date) }}</span>
+            <p class="archive-text">{{ entry.methodLog ? `问题：${entry.methodLog.problem}` : entry.content }}</p>
+          </div>
+          <span class="gold archive-gold">+{{ entry.goldEarned }} 金</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -70,14 +93,25 @@ import { computed, onMounted, ref } from 'vue'
 import { usePlayerStore } from '@/stores/player.store'
 import { usePlanStore } from '@/stores/plan.store'
 import { useProgressStore } from '@/stores/progress.store'
+import { useThinkingArchiveStore } from '@/stores/thinking-archive.store'
 import type { DailyProgressSheet } from '@/types/tasks'
+import type { ReflectionType } from '@/types/tasks'
+import { REFLECTION_TYPE_LABELS, REFLECTION_TYPE_ICONS } from '@/engine/reflection-anchor'
 import { formatDateCN, getWeekDates, currentWeek, today } from '@/utils/date'
 
 const playerStore = usePlayerStore()
 const planStore = usePlanStore()
 const progressStore = useProgressStore()
+const archiveStore = useThinkingArchiveStore()
 
 const sheetMap = ref<Record<string, DailyProgressSheet>>({})
+
+function getArchiveIcon(type: ReflectionType) { return REFLECTION_TYPE_ICONS[type] }
+function getArchiveLabel(type: ReflectionType) { return REFLECTION_TYPE_LABELS[type] }
+
+const recentEntries = computed(() =>
+  [...archiveStore.entries].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 2)
+)
 
 const planStatusText = computed(() => {
   const m: Record<string, string> = { draft: '草稿', active: '进行中', completed: '已完成' }
@@ -116,6 +150,7 @@ onMounted(async () => {
   const map: Record<string, DailyProgressSheet> = {}
   for (const s of progressStore.weekSheets) map[s.date] = s
   sheetMap.value = map
+  await archiveStore.loadWeek(wk)
 })
 </script>
 
@@ -138,4 +173,16 @@ onMounted(async () => {
 .todo-item:hover { background:var(--color-bg-lighter); }
 .todo-item.approve { border-left:3px solid var(--color-warning); }
 .dim { color:var(--color-text-dim); }
+.gold { color:var(--color-gold); font-weight:700; }
+.archive-header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.archive-header-row h2 { margin:0; }
+.view-all { font-size:0.85rem; color:var(--color-xp); text-decoration:none; font-weight:600; font-family:'Fredoka',sans-serif; }
+.view-all:hover { text-decoration:underline; }
+.archive-entry { display:flex; align-items:flex-start; gap:10px; padding:12px; background:var(--color-bg); border-radius:10px; margin-bottom:8px; }
+.archive-icon { font-size:1.3rem; flex-shrink:0; }
+.archive-content { flex:1; min-width:0; }
+.archive-type { font-weight:700; font-family:'Fredoka',sans-serif; font-size:0.9rem; margin-right:8px; }
+.archive-date { font-size:0.8rem; }
+.archive-text { margin:4px 0 0; font-size:0.85rem; color:var(--color-text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.archive-gold { font-size:0.9rem; flex-shrink:0; font-family:'Fredoka',sans-serif; }
 </style>
