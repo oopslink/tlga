@@ -23,7 +23,7 @@ export function checkAllAnchorsCompleted(sheet: DailyProgressSheet): boolean {
     return def?.category === 'language' && t.completed
   })
 
-  const hasReflection = !!(sheet.reflection?.content?.trim())
+  const hasReflection = (sheet.reflections ?? []).some(r => r.content?.trim())
 
   return hasMath && hasLanguage && hasReflection
 }

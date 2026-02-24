@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { DailyProgressSheet, ProgressTaskItem, ReflectionType, MethodLog } from '@/types/tasks'
+import type { DailyProgressSheet, ProgressTaskItem } from '@/types/tasks'
 import { storage } from '@/services/storage-factory'
 import { usePlayerStore } from './player.store'
 import { useThinkingArchiveStore } from './thinking-archive.store'
@@ -58,9 +58,9 @@ export const useProgressStore = defineStore('progress', () => {
     task.kidComment = kidComment
   }
 
-  function updateReflection(reflection: DailyProgressSheet['reflection']) {
+  function updateReflections(reflections: DailyProgressSheet['reflections']) {
     if (!currentSheet.value) return
-    currentSheet.value.reflection = reflection
+    currentSheet.value.reflections = reflections
   }
 
   function updateWeeklyReview(review: DailyProgressSheet['weeklyReview']) {
@@ -107,8 +107,10 @@ export const useProgressStore = defineStore('progress', () => {
     totalGold += s.bonusGold ?? 0
     totalXp += s.bonusXp ?? 0
 
-    // 反思与创造金币
-    totalGold += s.reflection?.goldEarned ?? 0
+    // 反思与创造金币（所有填写的项目累加）
+    for (const r of s.reflections ?? []) {
+      totalGold += r.goldEarned
+    }
 
     // 三锚点全完成奖励
     const allAnchors = checkAllAnchorsCompleted(s)
@@ -138,19 +140,22 @@ export const useProgressStore = defineStore('progress', () => {
     playerStore.addRewards(totalGold, totalXp)
     await playerStore.save()
 
-    // 写入思维档案
-    if (s.reflection?.content?.trim()) {
+    // 写入思维档案（每个填写的反思项各存一条）
+    const filled = (s.reflections ?? []).filter(r => r.content?.trim())
+    if (filled.length > 0) {
       const archiveStore = useThinkingArchiveStore()
-      const entry: ThinkingArchiveEntry = {
-        id: `${s.date}-reflection`,
-        date: s.date,
-        weekId: s.weekId,
-        type: s.reflection.type,
-        content: s.reflection.content,
-        methodLog: s.reflection.methodLog,
-        goldEarned: s.reflection.goldEarned,
+      for (const r of filled) {
+        const entry: ThinkingArchiveEntry = {
+          id: `${s.date}-${r.type}`,
+          date: s.date,
+          weekId: s.weekId,
+          type: r.type,
+          content: r.content,
+          methodLog: r.methodLog,
+          goldEarned: r.goldEarned,
+        }
+        await archiveStore.addEntry(s.weekId, entry)
       }
-      await archiveStore.addEntry(s.weekId, entry)
     }
   }
 
@@ -166,7 +171,7 @@ export const useProgressStore = defineStore('progress', () => {
   return {
     currentSheet, weekSheets, loading, error,
     loadSheet, loadWeekSheets, saveSheet,
-    updateTaskProgress, updateReflection, updateWeeklyReview, submitSheet,
+    updateTaskProgress, updateReflections, updateWeeklyReview, submitSheet,
     overrideTask, approveSheet, rejectSheet,
   }
 })

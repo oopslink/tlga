@@ -65,13 +65,13 @@ export interface DailyProgressSheet {
   submittedAt?: string
   reviewedAt?: string
   reviewComment?: string        // 审批员整体评语
-  // 锚点三：反思与创造
-  reflection?: {
+  // 锚点三：反思与创造（可填1~3项，各自计金币）
+  reflections?: Array<{
     type: ReflectionType
     content: string
     methodLog?: MethodLog
     goldEarned: number          // 2 或 3
-  }
+  }>
   allAnchorsCompleted?: boolean
   allAnchorsBonusGold?: number  // +2
   allAnchorsBonusXp?: number    // +10

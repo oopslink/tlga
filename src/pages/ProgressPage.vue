@@ -97,66 +97,64 @@
         <div class="anchor-header">
           <span class="anchor-icon">🧠</span>
           <h3>锚点三：反思与创造</h3>
-          <span class="anchor-badge">三选一 · 每日必做</span>
+          <span class="anchor-badge">可填1~3项 · 各自计金币</span>
         </div>
 
         <div v-if="isEditable">
-          <div class="reflection-types">
-            <label
-              v-for="rt in reflectionTypes"
-              :key="rt.type"
-              class="reflection-type-option"
-              :class="{ selected: reflectionType === rt.type }"
-            >
-              <input type="radio" :value="rt.type" v-model="reflectionType" style="display:none" />
-              <span class="rt-icon">{{ rt.icon }}</span>
-              <span class="rt-name">{{ rt.label }}</span>
-              <span class="rt-gold">+{{ rt.gold }} 金</span>
-            </label>
+          <!-- 发现时刻 -->
+          <div class="reflection-item">
+            <div class="reflection-item-header">
+              <span>💡 发现时刻</span>
+              <span class="rt-gold">+3 金</span>
+            </div>
+            <textarea class="input" v-model="discoveryContent" rows="2" placeholder="今天的数学/生活观察，写下你的发现..."></textarea>
           </div>
 
-          <template v-if="reflectionType">
-            <!-- 方法日志：三行结构化输入 -->
-            <div v-if="reflectionType === 'method-log'" class="method-log-form">
-              <div class="form-group">
-                <label class="label">问题是什么？</label>
-                <input class="input" v-model="methodLogProblem" placeholder="描述你遇到的问题..." />
-              </div>
-              <div class="form-group">
-                <label class="label">用了什么方法？</label>
-                <input class="input" v-model="methodLogMethod" placeholder="描述你的解题方法..." />
-              </div>
-              <div class="form-group">
-                <label class="label">背后的原理是什么？</label>
-                <input class="input" v-model="methodLogPrinciple" placeholder="总结核心原理..." />
-              </div>
+          <!-- 开放问题 -->
+          <div class="reflection-item">
+            <div class="reflection-item-header">
+              <span>❓ 开放问题</span>
+              <span class="rt-gold">+2 金</span>
             </div>
-            <!-- 其他类型：单个文本域 -->
-            <div v-else class="form-group">
-              <label class="label">{{ reflectionType === 'discovery' ? '我发现了什么？' : '我想到了什么问题？' }}</label>
-              <textarea class="input" v-model="reflectionContent" rows="3" placeholder="写下你的想法..."></textarea>
+            <textarea class="input" v-model="openQuestionContent" rows="2" placeholder="回答当天开放问题，2-3句话..."></textarea>
+          </div>
+
+          <!-- 方法日志 -->
+          <div class="reflection-item">
+            <div class="reflection-item-header">
+              <span>📝 方法日志</span>
+              <span class="rt-gold">+3 金</span>
             </div>
-          </template>
+            <div class="method-log-form">
+              <input class="input" v-model="methodLogProblem" placeholder="我遇到了什么问题..." />
+              <input class="input" v-model="methodLogMethod" placeholder="我想到了什么方法..." />
+              <input class="input" v-model="methodLogPrinciple" placeholder="我觉得这个方法的原理是..." />
+            </div>
+          </div>
         </div>
 
         <!-- 只读模式 -->
-        <div v-else-if="sheet.reflection" class="reflection-readonly">
-          <div class="reflection-type-tag">
-            <span>{{ getReflectionIcon(sheet.reflection.type) }}</span>
-            <span>{{ getReflectionLabel(sheet.reflection.type) }}</span>
-            <span class="gold">+{{ sheet.reflection.goldEarned }} 金</span>
+        <template v-else>
+          <div v-if="(sheet.reflections ?? []).length > 0">
+            <div v-for="r in sheet.reflections" :key="r.type" class="reflection-readonly">
+              <div class="reflection-type-tag">
+                <span>{{ getReflectionIcon(r.type) }}</span>
+                <span>{{ getReflectionLabel(r.type) }}</span>
+                <span class="gold">+{{ r.goldEarned }} 金</span>
+              </div>
+              <div v-if="r.methodLog" class="method-log-readonly">
+                <p><strong>问题：</strong>{{ r.methodLog.problem }}</p>
+                <p><strong>方法：</strong>{{ r.methodLog.method }}</p>
+                <p><strong>原理：</strong>{{ r.methodLog.principle }}</p>
+              </div>
+              <p v-else>{{ r.content }}</p>
+            </div>
+            <div v-if="sheet.allAnchorsCompleted" class="anchors-bonus-tag">
+              🏆 三锚点全完成！+{{ sheet.allAnchorsBonusGold }} 金 +{{ sheet.allAnchorsBonusXp }} XP
+            </div>
           </div>
-          <div v-if="sheet.reflection.methodLog" class="method-log-readonly">
-            <p><strong>问题：</strong>{{ sheet.reflection.methodLog.problem }}</p>
-            <p><strong>方法：</strong>{{ sheet.reflection.methodLog.method }}</p>
-            <p><strong>原理：</strong>{{ sheet.reflection.methodLog.principle }}</p>
-          </div>
-          <p v-else>{{ sheet.reflection.content }}</p>
-          <div v-if="sheet.allAnchorsCompleted" class="anchors-bonus-tag">
-            🏆 三锚点全完成！+{{ sheet.allAnchorsBonusGold }} 金 +{{ sheet.allAnchorsBonusXp }} XP
-          </div>
-        </div>
-        <div v-else class="dim" style="padding:12px 0">未填写反思内容</div>
+          <div v-else class="dim" style="padding:12px 0">未填写反思内容</div>
+        </template>
       </div>
 
       <!-- 周日本周回顾 -->
@@ -237,13 +235,12 @@ import { usePlanStore } from '@/stores/plan.store'
 import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
 import { getTaskById } from '@/utils/tasks'
 import { CATEGORY_ICONS, type TaskVariant, type ReflectionType } from '@/types/tasks'
+
 import { formatDateCN, today, currentWeek, getWeekDates } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
 import {
-  REFLECTION_GOLD,
   REFLECTION_TYPE_LABELS,
   REFLECTION_TYPE_ICONS,
-  validateMethodLog,
   calcReflectionGold,
 } from '@/engine/reflection-anchor'
 
@@ -262,17 +259,11 @@ const selectedDate = computed(() => (route.params.date as string) || today())
 
 // ==================== 反思与创造 ====================
 
-const reflectionType = ref<ReflectionType | null>(null)
-const reflectionContent = ref('')
+const discoveryContent = ref('')
+const openQuestionContent = ref('')
 const methodLogProblem = ref('')
 const methodLogMethod = ref('')
 const methodLogPrinciple = ref('')
-
-const reflectionTypes = [
-  { type: 'discovery' as ReflectionType, icon: '💡', label: '发现时刻', gold: REFLECTION_GOLD['discovery'] },
-  { type: 'open-question' as ReflectionType, icon: '❓', label: '开放问题', gold: REFLECTION_GOLD['open-question'] },
-  { type: 'method-log' as ReflectionType, icon: '📝', label: '方法日志', gold: REFLECTION_GOLD['method-log'] },
-]
 
 function getReflectionIcon(type: ReflectionType) { return REFLECTION_TYPE_ICONS[type] }
 function getReflectionLabel(type: ReflectionType) { return REFLECTION_TYPE_LABELS[type] }
@@ -293,22 +284,13 @@ const reviewNextWeek = ref('')
 function initReflectionFromSheet() {
   const s = progressStore.currentSheet
   if (!s) return
-  if (s.reflection) {
-    reflectionType.value = s.reflection.type
-    if (s.reflection.methodLog) {
-      methodLogProblem.value = s.reflection.methodLog.problem
-      methodLogMethod.value = s.reflection.methodLog.method
-      methodLogPrinciple.value = s.reflection.methodLog.principle
-    } else {
-      reflectionContent.value = s.reflection.content
-    }
-  } else {
-    reflectionType.value = null
-    reflectionContent.value = ''
-    methodLogProblem.value = ''
-    methodLogMethod.value = ''
-    methodLogPrinciple.value = ''
-  }
+  // 从已存数据初始化各字段
+  discoveryContent.value = s.reflections?.find(r => r.type === 'discovery')?.content ?? ''
+  openQuestionContent.value = s.reflections?.find(r => r.type === 'open-question')?.content ?? ''
+  const ml = s.reflections?.find(r => r.type === 'method-log')
+  methodLogProblem.value = ml?.methodLog?.problem ?? ''
+  methodLogMethod.value = ml?.methodLog?.method ?? ''
+  methodLogPrinciple.value = ml?.methodLog?.principle ?? ''
   if (s.weeklyReview) {
     reviewProudest.value = s.weeklyReview.answers.proudest
     reviewDiscovery.value = s.weeklyReview.answers.discovery
@@ -320,23 +302,21 @@ function initReflectionFromSheet() {
   }
 }
 
-function buildReflectionData() {
-  if (!reflectionType.value) return undefined
-  if (reflectionType.value === 'method-log') {
+function buildReflectionsData(): NonNullable<import('@/types/tasks').DailyProgressSheet['reflections']> {
+  const result: NonNullable<import('@/types/tasks').DailyProgressSheet['reflections']> = []
+  if (discoveryContent.value.trim()) {
+    result.push({ type: 'discovery', content: discoveryContent.value, goldEarned: calcReflectionGold('discovery') })
+  }
+  if (openQuestionContent.value.trim()) {
+    result.push({ type: 'open-question', content: openQuestionContent.value, goldEarned: calcReflectionGold('open-question') })
+  }
+  const hasMethodLog = methodLogProblem.value.trim() || methodLogMethod.value.trim() || methodLogPrinciple.value.trim()
+  if (hasMethodLog) {
     const log = { problem: methodLogProblem.value, method: methodLogMethod.value, principle: methodLogPrinciple.value }
     const content = `问题：${log.problem} / 方法：${log.method} / 原理：${log.principle}`
-    return {
-      type: reflectionType.value,
-      content,
-      methodLog: log,
-      goldEarned: calcReflectionGold(reflectionType.value),
-    }
+    result.push({ type: 'method-log', content, methodLog: log, goldEarned: calcReflectionGold('method-log') })
   }
-  return {
-    type: reflectionType.value,
-    content: reflectionContent.value,
-    goldEarned: calcReflectionGold(reflectionType.value),
-  }
+  return result
 }
 
 function buildWeeklyReviewData() {
@@ -432,7 +412,7 @@ async function loadData() {
 
 async function handleSave() {
   if (!sheet.value) return
-  progressStore.updateReflection(buildReflectionData())
+  progressStore.updateReflections(buildReflectionsData())
   progressStore.updateWeeklyReview(buildWeeklyReviewData())
   await progressStore.saveSheet(sheet.value)
   await showAlert('已暂存')
@@ -440,7 +420,7 @@ async function handleSave() {
 
 async function handleSubmit() {
   if (!await showConfirm('确认提交？提交后需要审批员审批。')) return
-  progressStore.updateReflection(buildReflectionData())
+  progressStore.updateReflections(buildReflectionsData())
   progressStore.updateWeeklyReview(buildWeeklyReviewData())
   await progressStore.submitSheet()
   await showAlert('已提交，等待审批')
@@ -830,52 +810,40 @@ onMounted(() => {
   white-space: nowrap;
 }
 
-.reflection-types {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.reflection-type-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 14px 8px;
+.reflection-item {
   background: var(--color-bg-elevated);
-  border: 2px solid rgba(94, 174, 255, 0.15);
+  border: 2px solid rgba(94, 174, 255, 0.12);
   border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  text-align: center;
+  padding: 14px;
+  margin-bottom: 12px;
 }
 
-.reflection-type-option:hover {
-  border-color: var(--color-xp);
-  transform: translateY(-2px);
-}
-
-.reflection-type-option.selected {
-  background: linear-gradient(135deg, rgba(94, 174, 255, 0.15), rgba(94, 174, 255, 0.25));
-  border-color: var(--color-xp);
-  box-shadow: 0 4px 12px rgba(94, 174, 255, 0.2);
-}
-
-.rt-icon { font-size: 1.5rem; }
-.rt-name {
-  font-size: 0.85rem;
+.reflection-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
   font-weight: 700;
   font-family: 'Fredoka', sans-serif;
+  font-size: 1rem;
 }
+
 .rt-gold {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--color-gold);
   font-weight: 700;
   font-family: 'Fredoka', sans-serif;
 }
 
-.method-log-form { margin-top: 4px; }
+.method-log-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.method-log-form .input {
+  margin-bottom: 0;
+}
 
 .reflection-readonly {
   padding: 12px;
@@ -928,9 +896,5 @@ onMounted(() => {
     font-size: 0.75rem;
   }
 
-  .reflection-types {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
 }
 </style>

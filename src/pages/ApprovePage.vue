@@ -114,21 +114,23 @@
         </div>
 
         <!-- 反思与创造（只读展示） -->
-        <div v-if="sheet.reflection || (isSunday && sheet.weeklyReview)" class="reflection-section">
+        <div v-if="(sheet.reflections ?? []).length > 0 || sheet.weeklyReview" class="reflection-section">
           <h3>🧠 锚点三：反思与创造</h3>
-          <div v-if="sheet.reflection" class="reflection-block">
-            <div class="reflection-type-row">
-              <span class="reflection-icon">{{ getReflectionIcon(sheet.reflection.type) }}</span>
-              <span class="reflection-label">{{ getReflectionLabel(sheet.reflection.type) }}</span>
-              <span class="gold">+{{ sheet.reflection.goldEarned }} 金</span>
+          <template v-if="(sheet.reflections ?? []).length > 0">
+            <div v-for="r in sheet.reflections" :key="r.type" class="reflection-block">
+              <div class="reflection-type-row">
+                <span class="reflection-icon">{{ getReflectionIcon(r.type) }}</span>
+                <span class="reflection-label">{{ getReflectionLabel(r.type) }}</span>
+                <span class="gold">+{{ r.goldEarned }} 金</span>
+              </div>
+              <div v-if="r.methodLog" class="method-log-view">
+                <p><strong>问题：</strong>{{ r.methodLog.problem }}</p>
+                <p><strong>方法：</strong>{{ r.methodLog.method }}</p>
+                <p><strong>原理：</strong>{{ r.methodLog.principle }}</p>
+              </div>
+              <p v-else class="reflection-content">{{ r.content }}</p>
             </div>
-            <div v-if="sheet.reflection.methodLog" class="method-log-view">
-              <p><strong>问题：</strong>{{ sheet.reflection.methodLog.problem }}</p>
-              <p><strong>方法：</strong>{{ sheet.reflection.methodLog.method }}</p>
-              <p><strong>原理：</strong>{{ sheet.reflection.methodLog.principle }}</p>
-            </div>
-            <p v-else class="reflection-content">{{ sheet.reflection.content }}</p>
-          </div>
+          </template>
           <div v-else class="dim">未填写反思内容</div>
 
           <div v-if="sheet.weeklyReview?.completed" class="weekly-review-block">
