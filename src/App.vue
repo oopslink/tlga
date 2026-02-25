@@ -6,8 +6,8 @@
         <div class="nav-links">
           <router-link to="/">仪表盘</router-link>
           <router-link to="/plan">本周计划</router-link>
-          <router-link to="/progress">每日进度</router-link>
-          <router-link to="/approve">评分</router-link>
+          <router-link to="/progress" :class="{ 'router-link-active': route.path.startsWith('/progress') }">每日进度</router-link>
+          <router-link to="/approve" :class="{ 'router-link-active': route.path.startsWith('/approve') }">评分</router-link>
           <router-link to="/settings">设置</router-link>
           <button @click="handleLogout" class="logout-btn" title="登出" aria-label="登出">
             <svg class="logout-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">
@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { usePlayerStore } from './stores/player.store'
 import { useAuthStore } from './stores/auth.store'
 import { useModal } from './composables/useModal'
@@ -34,6 +34,7 @@ import AppModal from './components/shared/AppModal.vue'
 import AppToast from './components/shared/AppToast.vue'
 
 const router = useRouter()
+const route = useRoute()
 const playerStore = usePlayerStore()
 const authStore = useAuthStore()
 const { showConfirm } = useModal()
