@@ -45,6 +45,8 @@
 
     <!-- 模版管理标签 -->
     <div v-if="currentTab === 'templates'" class="tab-content">
+      <WeeklyTemplateManagement />
+      <div class="section-divider"></div>
       <TemplateManagement />
     </div>
 
@@ -60,6 +62,7 @@ import { ref } from 'vue'
 import HistoryListView from '@/components/settings/HistoryListView.vue'
 import TaskManagement from '@/components/settings/TaskManagement.vue'
 import TemplateManagement from '@/components/settings/TemplateManagement.vue'
+import WeeklyTemplateManagement from '@/components/settings/WeeklyTemplateManagement.vue'
 import ChangePassword from '@/components/settings/ChangePassword.vue'
 
 const currentTab = ref<'history' | 'tasks' | 'templates' | 'password'>('history')
@@ -97,6 +100,12 @@ const currentTab = ref<'history' | 'tasks' | 'templates' | 'password'>('history'
 
 .tab-content {
   animation: fadeIn 0.3s ease;
+}
+
+.section-divider {
+  border: none;
+  border-top: 2px dashed rgba(255, 107, 157, 0.12);
+  margin: 28px 0;
 }
 
 @keyframes fadeIn {

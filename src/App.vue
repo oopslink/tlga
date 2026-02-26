@@ -9,7 +9,6 @@
           <router-link to="/progress" :class="{ 'router-link-active': route.path.startsWith('/progress') }">每日进度</router-link>
           <router-link to="/approve" :class="{ 'router-link-active': route.path.startsWith('/approve') }">评分</router-link>
           <router-link to="/thinking-archive" :class="{ 'router-link-active': route.path.startsWith('/thinking-archive') }">思维档案</router-link>
-          <router-link to="/templates" :class="{ 'router-link-active': route.path.startsWith('/templates') }">模板</router-link>
           <router-link to="/settings">设置</router-link>
           <button @click="handleLogout" class="logout-btn" title="登出" aria-label="登出">
             <svg class="logout-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">

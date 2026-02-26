@@ -1,0 +1,10 @@
+{
+  "id": "tlga-adventure",
+  "name": "小学霸冒险记",
+  "version": "1.0.0",
+  "minAppVersion": "1.4.0",
+  "description": "小学生学习任务管理与奖励系统",
+  "author": "oopslink",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
