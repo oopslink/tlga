@@ -79,21 +79,37 @@
               v-for="(t, i) in selectedDay.tasks"
               :key="i"
               class="task-row"
+              :class="{ 'task-row-locked': t.isLocked }"
             >
               <div class="task-row-left">
-                <span class="task-icon">{{ getCatIcon(t.taskId) }}</span>
+                <span class="task-icon">{{ t.isLocked ? '🔒' : getCatIcon(t.taskId) }}</span>
                 <div class="task-info">
-                  <span class="task-name">{{ getTaskName(t.taskId) }}</span>
-                  <span v-if="t.targetVariant" class="variant-chip">{{ t.targetVariant }}</span>
+                  <span class="task-name">{{ t.isLocked ? t.note : getTaskName(t.taskId) }}</span>
+                  <span v-if="t.isLocked" class="locked-chip">模板</span>
+                  <span v-else-if="t.targetVariant" class="variant-chip">{{ t.targetVariant }}</span>
                 </div>
               </div>
               <input
+                v-if="t.isLocked"
+                class="note-input"
+                :value="t.targetVariant ?? ''"
+                placeholder="具体内容（可选，如：P45-47）"
+                @input="planStore.editTask(selectedDate, i, { targetVariant: ($event.target as HTMLInputElement).value })"
+              />
+              <input
+                v-else
                 class="note-input"
                 :value="t.note"
                 placeholder="备注..."
                 @input="planStore.editTask(selectedDate, i, { note: ($event.target as HTMLInputElement).value })"
               />
-              <button class="btn-delete" @click="planStore.removeTask(selectedDate, i)" title="移除">✕</button>
+              <button
+                v-if="!t.isLocked"
+                class="btn-delete"
+                @click="planStore.removeTask(selectedDate, i)"
+                title="移除"
+              >✕</button>
+              <span v-else class="lock-placeholder"></span>
             </div>
           </div>
 
@@ -610,6 +626,34 @@ onMounted(async () => {
 .task-row:hover {
   border-color: rgba(255, 107, 157, 0.15);
   box-shadow: var(--shadow-sm);
+}
+
+.task-row-locked {
+  background: linear-gradient(135deg, rgba(94, 174, 255, 0.04), rgba(94, 174, 255, 0.08));
+  border-color: rgba(94, 174, 255, 0.15) !important;
+}
+
+.task-row-locked:hover {
+  border-color: rgba(94, 174, 255, 0.3) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+.locked-chip {
+  background: linear-gradient(135deg, rgba(94, 174, 255, 0.15), rgba(94, 174, 255, 0.25));
+  color: var(--color-xp);
+  border: 1px solid rgba(94, 174, 255, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.lock-placeholder {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
 }
 
 .task-row-left {

@@ -41,6 +41,32 @@ export interface PlannedTaskItem {
   taskId: string
   targetVariant?: string        // 目标完成程度
   note: string                  // 说明文本/备注
+  isLocked?: boolean            // 来自周模板，不可删除
+  templateItemId?: string       // 关联的模板项 ID
+}
+
+// ==================== 周计划模板 ====================
+
+export interface WeeklyTemplateItem {
+  id: string                    // 唯一标识（如 "anchor-math-homework"）
+  label: string                 // 显示文本（如"学校数学作业（含课堂配套练习）"）
+  taskId?: string               // 关联的 TaskDefinition id（可选）
+}
+
+export interface DayTemplateConfig {
+  mathItems: WeeklyTemplateItem[]      // 锚点一：数学固定项
+  languageItems: WeeklyTemplateItem[]  // 锚点二：语言固定项
+  reflectionEnabled: boolean           // 锚点三：是否启用
+}
+
+export type WeekdayKey = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
+
+export interface WeeklyTemplate {
+  id: string
+  name: string
+  isDefault: boolean
+  createdAt: string
+  days: Record<WeekdayKey, DayTemplateConfig>
 }
 
 // ==================== 反思类型 ====================

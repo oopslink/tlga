@@ -1,7 +1,51 @@
-import type { WeeklyPlan, DailyPlan, PlannedTaskItem, DailyProgressSheet, ProgressTaskItem } from '@/types/tasks'
+import type { WeeklyPlan, DailyPlan, PlannedTaskItem, DailyProgressSheet, ProgressTaskItem, WeeklyTemplate, WeekdayKey } from '@/types/tasks'
 import { getWeekDates, toISODate } from '@/utils/date'
 
+const ISO_WEEKDAY_KEYS: WeekdayKey[] = [
+  'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+]
+
 // ==================== 周计划管理 ====================
+
+/** 从周模板生成带锁定项的周计划草稿 */
+export function generatePlanFromWeeklyTemplate(weekId: string, template: WeeklyTemplate): WeeklyPlan {
+  const dates = getWeekDates(weekId)
+  const dailyPlans: DailyPlan[] = dates.map((date, idx) => {
+    const dayKey = ISO_WEEKDAY_KEYS[idx]
+    const dayConfig = template.days[dayKey]
+    const tasks: PlannedTaskItem[] = []
+
+    for (const item of dayConfig.mathItems) {
+      tasks.push({
+        taskId: item.taskId ?? 'homework',
+        note: item.label,
+        isLocked: true,
+        templateItemId: item.id,
+      })
+    }
+
+    for (const item of dayConfig.languageItems) {
+      tasks.push({
+        taskId: item.taskId ?? 'recitation',
+        note: item.label,
+        isLocked: true,
+        templateItemId: item.id,
+      })
+    }
+
+    return { date, tasks }
+  })
+
+  return {
+    weekId,
+    startDate: dates[0],
+    endDate: dates[6],
+    status: 'draft',
+    dailyPlans,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+}
 
 export function createWeeklyPlan(weekId: string): WeeklyPlan {
   const dates = getWeekDates(weekId)

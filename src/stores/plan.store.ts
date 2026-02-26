@@ -4,11 +4,14 @@ import type { WeeklyPlan, PlannedTaskItem } from '@/types/tasks'
 import { storage } from '@/services/storage-factory'
 import {
   createWeeklyPlan,
+  generatePlanFromWeeklyTemplate,
   activatePlan,
   generateAllProgressSheets,
 } from '@/engine/weekly-plan'
 import { currentWeek } from '@/utils/date'
 import { useProgressStore } from './progress.store'
+import { useWeeklyTemplateStore } from './weekly-template.store'
+import { useModal } from '@/composables/useModal'
 
 export const usePlanStore = defineStore('plan', () => {
   const plan = ref<WeeklyPlan | null>(null)
@@ -24,7 +27,14 @@ export const usePlanStore = defineStore('plan', () => {
     error.value = null
     try {
       const data = await storage.read<WeeklyPlan>(`weeks/${wk}/plan.json`)
-      plan.value = data ?? createWeeklyPlan(wk)
+      if (data) {
+        plan.value = data
+      } else {
+        // 无计划时：从默认周模板生成带锁定项的草稿
+        const templateStore = useWeeklyTemplateStore()
+        await templateStore.load()
+        plan.value = generatePlanFromWeeklyTemplate(wk, templateStore.defaultTemplate)
+      }
     } catch (e) {
       error.value = (e as Error).message
     } finally {
@@ -49,10 +59,16 @@ export const usePlanStore = defineStore('plan', () => {
     plan.value.updatedAt = new Date().toISOString()
   }
 
-  function removeTask(date: string, idx: number) {
+  async function removeTask(date: string, idx: number) {
     if (!plan.value) return
     const dp = plan.value.dailyPlans.find(d => d.date === date)
     if (!dp) return
+    const task = dp.tasks[idx]
+    if (task?.isLocked) {
+      const { showAlert } = useModal()
+      await showAlert('此项来自周模板，不可删除。\n如需修改，请前往"模板管理"调整模板。')
+      return
+    }
     dp.tasks.splice(idx, 1)
     plan.value.updatedAt = new Date().toISOString()
   }
