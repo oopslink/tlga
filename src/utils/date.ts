@@ -1,12 +1,20 @@
 /**
- * Get ISO week string like "2026-W07"
+ * Get Sunday-based week string like "2026-W07"
+ * A week runs Sunday–Saturday.
+ * Week number is determined by the Thursday of the week (same rule as ISO 8601),
+ * which keeps week ownership at year boundaries consistent.
  */
 export function getISOWeek(date: Date): string {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-  const weekNo = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
-  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`
+  // dayOfWeek: 0=Sun, 1=Mon, ..., 6=Sat
+  const dayOfWeek = d.getUTCDay()
+  // Find Thursday of this Sunday-to-Saturday week (offset = 4 - dayOfWeek)
+  const thursday = new Date(d)
+  thursday.setUTCDate(d.getUTCDate() + (4 - dayOfWeek))
+
+  const yearStart = new Date(Date.UTC(thursday.getUTCFullYear(), 0, 1))
+  const weekNo = Math.ceil(((thursday.getTime() - yearStart.getTime()) / 86400000 + 1) / 7)
+  return `${thursday.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`
 }
 
 /**
@@ -38,28 +46,33 @@ export function currentWeek(): string {
 }
 
 /**
- * Get all dates in a given ISO week
+ * Get all dates in a given week (Sunday to Saturday)
  */
 export function getWeekDates(weekId: string): string[] {
   const [yearStr, weekStr] = weekId.split('-W')
   const year = parseInt(yearStr)
   const week = parseInt(weekStr)
 
-  // Find Jan 4 of the year (always in week 1)
+  // Find Jan 4 of the year (always in ISO week 1; we use same anchor)
   const jan4 = new Date(Date.UTC(year, 0, 4))
-  const dayOfWeek = jan4.getUTCDay() || 7
-  // Monday of week 1
-  const mondayWeek1 = new Date(jan4)
-  mondayWeek1.setUTCDate(jan4.getUTCDate() - dayOfWeek + 1)
+  // jan4 day-of-week in ISO convention (1=Mon … 7=Sun)
+  const jan4ISODay = jan4.getUTCDay() || 7
+  // Monday of ISO week 1
+  const isoWeek1Monday = new Date(jan4)
+  isoWeek1Monday.setUTCDate(jan4.getUTCDate() - jan4ISODay + 1)
 
-  // Monday of target week
-  const monday = new Date(mondayWeek1)
-  monday.setUTCDate(mondayWeek1.getUTCDate() + (week - 1) * 7)
+  // Sunday of Sunday-based week 1 = ISO week-1 Monday - 1 day
+  const sundayWeek1 = new Date(isoWeek1Monday)
+  sundayWeek1.setUTCDate(isoWeek1Monday.getUTCDate() - 1)
+
+  // Sunday of target week
+  const sunday = new Date(sundayWeek1)
+  sunday.setUTCDate(sundayWeek1.getUTCDate() + (week - 1) * 7)
 
   const dates: string[] = []
   for (let i = 0; i < 7; i++) {
-    const d = new Date(monday)
-    d.setUTCDate(monday.getUTCDate() + i)
+    const d = new Date(sunday)
+    d.setUTCDate(sunday.getUTCDate() + i)
     dates.push(toISODate(d))
   }
   return dates
@@ -102,9 +115,9 @@ export function daysBetween(date1: string, date2: string): number {
  */
 export function getPreviousWeek(weekId: string): string {
   const dates = getWeekDates(weekId)
-  const monday = parseDate(dates[0])
-  monday.setDate(monday.getDate() - 7)
-  return getISOWeek(monday)
+  const sunday = parseDate(dates[0])
+  sunday.setDate(sunday.getDate() - 7)
+  return getISOWeek(sunday)
 }
 
 /**
@@ -112,9 +125,9 @@ export function getPreviousWeek(weekId: string): string {
  */
 export function getNextWeek(weekId: string): string {
   const dates = getWeekDates(weekId)
-  const monday = parseDate(dates[0])
-  monday.setDate(monday.getDate() + 7)
-  return getISOWeek(monday)
+  const sunday = parseDate(dates[0])
+  sunday.setDate(sunday.getDate() + 7)
+  return getISOWeek(sunday)
 }
 
 /**

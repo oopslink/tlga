@@ -1,5 +1,6 @@
 import { Plugin, ItemView, type WorkspaceLeaf } from 'obsidian'
 import { createApp, type App as VueApp } from 'vue'
+import './style.css'
 import { createPinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import AppVue from './App.vue'

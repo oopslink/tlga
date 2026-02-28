@@ -1,6 +1,40 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'node:path'
+import type { PluginCreator } from 'postcss'
+
+/**
+ * PostCSS plugin: scope all CSS selectors to .tlga-obsidian-root
+ * so that our global styles don't pollute Obsidian's own UI.
+ *
+ * Rules:
+ *  - :root  → kept as-is (CSS variables need to be global)
+ *  - html / body / #app  → remapped to .tlga-obsidian-root
+ *  - @keyframes / @font-face contents → kept as-is
+ *  - everything else  → prefixed with .tlga-obsidian-root
+ */
+const scopeToObsidianRoot: PluginCreator<void> = () => ({
+  postcssPlugin: 'scope-to-obsidian-root',
+  Rule(rule) {
+    const parent = rule.parent as { type?: string; name?: string } | undefined
+    // Skip rules nested inside @keyframes
+    if (parent?.type === 'atrule' && /keyframes/i.test(parent.name ?? '')) return
+    // Keep :root as-is
+    if (/^:root(\s|,|$)/.test(rule.selector.trim())) return
+    // Skip already scoped
+    if (rule.selector.includes('.tlga-obsidian-root')) return
+
+    rule.selector = rule.selector
+      .split(',')
+      .map(s => {
+        const trimmed = s.trim()
+        if (/^(html|body|#app)$/.test(trimmed)) return '.tlga-obsidian-root'
+        return `.tlga-obsidian-root ${trimmed}`
+      })
+      .join(', ')
+  },
+})
+scopeToObsidianRoot.postcss = true
 
 /**
  * Obsidian Plugin Build Config
@@ -18,6 +52,12 @@ export default defineConfig({
 
   resolve: {
     alias: { '@': path.resolve(__dirname, 'src') },
+  },
+
+  css: {
+    postcss: {
+      plugins: [scopeToObsidianRoot()],
+    },
   },
 
   define: {

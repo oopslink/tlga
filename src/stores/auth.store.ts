@@ -4,6 +4,10 @@ import { ref, computed } from 'vue'
 const STORAGE_KEY = 'app_password'
 const AUTH_SESSION_KEY = 'is_authenticated'
 
+// Use localStorage for auth persistence so it survives Obsidian panel close/reopen
+// sessionStorage is cleared when Obsidian closes the view
+const authStorage = localStorage
+
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   const hasPassword = ref(false)
@@ -14,7 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
     hasPassword.value = !!storedPassword
 
     // 检查会话状态（刷新页面后仍保持登录）
-    const sessionAuth = sessionStorage.getItem(AUTH_SESSION_KEY)
+    const sessionAuth = authStorage.getItem(AUTH_SESSION_KEY)
     isAuthenticated.value = sessionAuth === 'true'
   }
 
@@ -29,7 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem(STORAGE_KEY, encrypted)
     hasPassword.value = true
     isAuthenticated.value = true
-    sessionStorage.setItem(AUTH_SESSION_KEY, 'true')
+    authStorage.setItem(AUTH_SESSION_KEY, 'true')
     return true
   }
 
@@ -45,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     if (isValid) {
       isAuthenticated.value = true
-      sessionStorage.setItem(AUTH_SESSION_KEY, 'true')
+      authStorage.setItem(AUTH_SESSION_KEY, 'true')
     }
 
     return isValid
@@ -54,7 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 登出
   function logout() {
     isAuthenticated.value = false
-    sessionStorage.removeItem(AUTH_SESSION_KEY)
+    authStorage.removeItem(AUTH_SESSION_KEY)
   }
 
   // 重置密码（需要先登录）
@@ -85,7 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
   // 清除所有数据（仅用于开发/调试）
   function clearAll() {
     localStorage.removeItem(STORAGE_KEY)
-    sessionStorage.removeItem(AUTH_SESSION_KEY)
+    authStorage.removeItem(AUTH_SESSION_KEY)
     hasPassword.value = false
     isAuthenticated.value = false
   }

@@ -655,3 +655,27 @@ h3 {
   border-top: 3px solid var(--color-gold);
   font-family: 'Fredoka', sans-serif;
 }
+
+/* ── Obsidian plugin scope ──────────────────────────────────────
+   .tlga-obsidian-root 是 Obsidian 的 .view-content 元素，
+   Obsidian 会用 .workspace-split.mod-root .view-content { background-color }
+   覆盖我们的背景（优先级更高）。
+   解决方案：把背景和基础样式放到子元素 .tlga-mount 上，Obsidian 不会targeting 它。
+   ─────────────────────────────────────────────────────────────── */
+
+/* 让插件面板撑满 Obsidian leaf 内容区，并覆盖 Obsidian 的 padding */
+.tlga-obsidian-root {
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 !important;
+}
+
+/* 真正的应用根容器 */
+.tlga-obsidian-root .tlga-mount {
+  background: var(--gradient-bg);
+  min-height: 100%;
+  font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--color-text);
+  line-height: 1.6;
+  animation: fadeIn 0.5s ease-out;
+}
