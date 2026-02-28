@@ -8,7 +8,7 @@ import {
   activatePlan,
   generateAllProgressSheets,
 } from '@/engine/weekly-plan'
-import { currentWeek } from '@/utils/date'
+import { currentWeek, getWeekDates } from '@/utils/date'
 import { useProgressStore } from './progress.store'
 import { useWeeklyTemplateStore } from './weekly-template.store'
 import { useModal } from '@/composables/useModal'
@@ -27,10 +27,14 @@ export const usePlanStore = defineStore('plan', () => {
     error.value = null
     try {
       const data = await storage.read<WeeklyPlan>(`weeks/${wk}/plan.json`)
-      if (data) {
+      const expectedDates = getWeekDates(wk)
+      const storedDates = data?.dailyPlans.map(d => d.date) ?? []
+      const datesMatch = expectedDates.every((d, i) => d === storedDates[i])
+
+      if (data && datesMatch) {
         plan.value = data
       } else {
-        // 无计划时：从默认周模板生成带锁定项的草稿
+        // 无计划，或已存计划的日期与当前周起始设置不符（如从周一改为周日），重新生成
         const templateStore = useWeeklyTemplateStore()
         await templateStore.load()
         plan.value = generatePlanFromWeeklyTemplate(wk, templateStore.defaultTemplate)
