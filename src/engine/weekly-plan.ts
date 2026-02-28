@@ -2,7 +2,7 @@ import type { WeeklyPlan, DailyPlan, PlannedTaskItem, DailyProgressSheet, Progre
 import { getWeekDates, toISODate } from '@/utils/date'
 
 const ISO_WEEKDAY_KEYS: WeekdayKey[] = [
-  'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+  'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday',
 ]
 
 // ==================== 周计划管理 ====================

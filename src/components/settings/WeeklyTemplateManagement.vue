@@ -117,13 +117,13 @@ const store = useWeeklyTemplateStore()
 const { showConfirm, showPrompt, showAlert } = useModal()
 
 const WEEKDAYS: { key: WeekdayKey; label: string }[] = [
+  { key: 'sunday',    label: '周日' },
   { key: 'monday',    label: '周一' },
   { key: 'tuesday',   label: '周二' },
   { key: 'wednesday', label: '周三' },
   { key: 'thursday',  label: '周四' },
   { key: 'friday',    label: '周五' },
   { key: 'saturday',  label: '周六' },
-  { key: 'sunday',    label: '周日' },
 ]
 
 const editingId = ref<string | null>(null)
