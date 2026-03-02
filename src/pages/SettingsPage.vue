@@ -30,6 +30,13 @@
       >
         🔐 修改密码
       </div>
+      <div
+        class="tab"
+        :class="{ active: currentTab === 'backup' }"
+        @click="currentTab = 'backup'"
+      >
+        💾 备份恢复
+      </div>
     </div>
 
     <!-- 历史记录标签 -->
@@ -54,6 +61,11 @@
     <div v-if="currentTab === 'password'" class="tab-content">
       <ChangePassword />
     </div>
+
+    <!-- 备份恢复标签 -->
+    <div v-if="currentTab === 'backup'" class="tab-content">
+      <BackupRestore />
+    </div>
   </div>
 </template>
 
@@ -64,8 +76,9 @@ import TaskManagement from '@/components/settings/TaskManagement.vue'
 import TemplateManagement from '@/components/settings/TemplateManagement.vue'
 import WeeklyTemplateManagement from '@/components/settings/WeeklyTemplateManagement.vue'
 import ChangePassword from '@/components/settings/ChangePassword.vue'
+import BackupRestore from '@/components/settings/BackupRestore.vue'
 
-const currentTab = ref<'history' | 'tasks' | 'templates' | 'password'>('history')
+const currentTab = ref<'history' | 'tasks' | 'templates' | 'password' | 'backup'>('history')
 </script>
 
 <style scoped>
