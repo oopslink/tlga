@@ -1,6 +1,6 @@
 import type { StorageService } from './storage'
 
-const PREFIX = 'tlgapp:'
+export const PREFIX = 'tlgapp:'
 
 /**
  * localStorage fallback implementation of StorageService.

@@ -39,7 +39,7 @@
           <span class="preview-date">{{ new Date(previewData.exportedAt).toLocaleString() }}</span>
         </div>
         <div class="preview-stats">
-          <span>共 {{ Object.keys(previewData.data).length }} 条数据</span>
+          <span>共 {{ Object.keys(previewData.data).length }} 个文件</span>
         </div>
       </div>
 
@@ -124,6 +124,9 @@ async function handleFileSelect(event: Event) {
     messageType.value = 'error'
     selectedFile.value = null
     previewData.value = null
+    if (fileInput.value) {
+      fileInput.value.value = ''
+    }
   }
 }
 
@@ -159,26 +162,31 @@ async function handleImportMerge() {
 
 async function handleImportReplace() {
   if (!previewData.value) return
-  
+
   const confirmed = await showConfirm(
-    '⚠️ 警告：此操作将完全替换所有现有数据！\n\n此操作不可撤销，请确保已导出当前数据的备份。'
+    '此操作将完全替换所有现有数据，且无法撤销！\n\n请确保已导出当前数据的备份，再继续操作。',
+    '⚠️ 危险操作 - 无法撤销'
   )
-  
+
   if (!confirmed) return
-  
+
   importing.value = true
   message.value = ''
-  
+
   try {
-    await replaceAllData(previewData.value)
-    message.value = '数据已完全替换！请刷新页面使更改生效。'
+    replaceAllData(previewData.value)
+    message.value = '数据已完全替换！正在重新加载页面...'
     messageType.value = 'success'
     selectedFile.value = null
     previewData.value = null
-    
+
     if (fileInput.value) {
       fileInput.value.value = ''
     }
+
+    setTimeout(() => {
+      window.location.reload()
+    }, 1500)
   } catch (e) {
     message.value = '导入失败: ' + (e as Error).message
     messageType.value = 'error'
