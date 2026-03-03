@@ -1,0 +1,13 @@
+[     219ms] [WARNING] [Vue Router warn]: The `next()` callback in navigation guards is deprecated. Return the value instead of calling `next(value)`. @ http://localhost:3000/node_modules/.vite/deps/vue-router.js?v=20f1bfe2:3653
+[     220ms] [WARNING] [Vue Router warn]: The `next()` callback in navigation guards is deprecated. Return the value instead of calling `next(value)`. @ http://localhost:3000/node_modules/.vite/deps/vue-router.js?v=20f1bfe2:3653
+[   21479ms] [WARNING] [Vue Router warn]: The `next()` callback in navigation guards is deprecated. Return the value instead of calling `next(value)`. @ http://localhost:3000/node_modules/.vite/deps/vue-router.js?v=20f1bfe2:3653
+[   21528ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/plan.json:0
+[   21530ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weekly-templates.json:0
+[   21533ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/progress/2026-03-01.json:0
+[   21534ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/progress/2026-03-02.json:0
+[   21534ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/progress/2026-03-03.json:0
+[   21535ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/progress/2026-03-04.json:0
+[   21535ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/progress/2026-03-05.json:0
+[   21536ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/progress/2026-03-06.json:0
+[   21536ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/progress/2026-03-07.json:0
+[   21537ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/data/weeks/2026-W10/thinking-archive.json:0

@@ -1,0 +1,231 @@
+{
+  "weekId": "2026-W10",
+  "startDate": "2026-03-01",
+  "endDate": "2026-03-07",
+  "status": "draft",
+  "dailyPlans": [
+    {
+      "date": "2026-03-01",
+      "tasks": [
+        {
+          "taskId": "math-hard",
+          "note": "1道难题（钻石/王者模式）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-hard"
+        },
+        {
+          "taskId": "recitation",
+          "note": "中文阅读",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-chinese"
+        },
+        {
+          "taskId": "recitation",
+          "note": "英语/法语阅读（选一，可两项都做）",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-en-or-fr"
+        }
+      ]
+    },
+    {
+      "date": "2026-03-02",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "note": "学校数学作业（含课堂配套练习）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-homework"
+        },
+        {
+          "taskId": "math-hard",
+          "note": "1道难题（钻石/王者模式）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-hard"
+        },
+        {
+          "taskId": "recitation",
+          "note": "背诵",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-recitation"
+        },
+        {
+          "taskId": "recitation",
+          "note": "中文阅读",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-chinese"
+        },
+        {
+          "taskId": "recitation",
+          "note": "英语/法语阅读（选一，可两项都做）",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-en-or-fr"
+        }
+      ]
+    },
+    {
+      "date": "2026-03-03",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "note": "学校数学作业（含课堂配套练习）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-homework"
+        },
+        {
+          "taskId": "math-hard",
+          "note": "1道难题（钻石/王者模式）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-hard"
+        },
+        {
+          "taskId": "recitation",
+          "note": "背诵",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-recitation"
+        },
+        {
+          "taskId": "recitation",
+          "note": "中文阅读",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-chinese"
+        },
+        {
+          "taskId": "recitation",
+          "note": "英语/法语阅读（选一，可两项都做）",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-en-or-fr"
+        }
+      ]
+    },
+    {
+      "date": "2026-03-04",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "note": "学校数学作业（含课堂配套练习）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-homework"
+        },
+        {
+          "taskId": "math-hard",
+          "note": "1道难题（钻石/王者模式）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-hard"
+        },
+        {
+          "taskId": "recitation",
+          "note": "背诵",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-recitation"
+        },
+        {
+          "taskId": "recitation",
+          "note": "中文阅读",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-chinese"
+        },
+        {
+          "taskId": "recitation",
+          "note": "英语/法语阅读（选一，可两项都做）",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-en-or-fr"
+        }
+      ]
+    },
+    {
+      "date": "2026-03-05",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "note": "学校数学作业（含课堂配套练习）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-homework"
+        },
+        {
+          "taskId": "math-hard",
+          "note": "1道难题（钻石/王者模式）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-hard"
+        },
+        {
+          "taskId": "recitation",
+          "note": "背诵",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-recitation"
+        },
+        {
+          "taskId": "recitation",
+          "note": "中文阅读",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-chinese"
+        },
+        {
+          "taskId": "recitation",
+          "note": "英语/法语阅读（选一，可两项都做）",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-en-or-fr"
+        }
+      ]
+    },
+    {
+      "date": "2026-03-06",
+      "tasks": [
+        {
+          "taskId": "homework",
+          "note": "学校数学作业（含课堂配套练习）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-homework"
+        },
+        {
+          "taskId": "math-hard",
+          "note": "1道难题（钻石/王者模式）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-hard"
+        },
+        {
+          "taskId": "recitation",
+          "note": "背诵",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-recitation"
+        },
+        {
+          "taskId": "recitation",
+          "note": "中文阅读",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-chinese"
+        },
+        {
+          "taskId": "recitation",
+          "note": "英语/法语阅读（选一，可两项都做）",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-en-or-fr"
+        }
+      ]
+    },
+    {
+      "date": "2026-03-07",
+      "tasks": [
+        {
+          "taskId": "math-hard",
+          "note": "1道难题（钻石/王者模式）",
+          "isLocked": true,
+          "templateItemId": "anchor-math-hard"
+        },
+        {
+          "taskId": "recitation",
+          "note": "中文阅读",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-chinese"
+        },
+        {
+          "taskId": "recitation",
+          "note": "英语/法语阅读（选一，可两项都做）",
+          "isLocked": true,
+          "templateItemId": "anchor-lang-en-or-fr"
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-03-03T14:00:41.850Z",
+  "updatedAt": "2026-03-03T14:00:41.850Z"
+}

@@ -1,0 +1,200 @@
+[
+  {
+    "id": "default",
+    "name": "标准学期模板",
+    "isDefault": true,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "days": {
+      "monday": {
+        "mathItems": [
+          {
+            "id": "anchor-math-homework",
+            "label": "学校数学作业（含课堂配套练习）",
+            "taskId": "homework"
+          },
+          {
+            "id": "anchor-math-hard",
+            "label": "1道难题（钻石/王者模式）",
+            "taskId": "math-hard"
+          }
+        ],
+        "languageItems": [
+          {
+            "id": "anchor-lang-recitation",
+            "label": "背诵",
+            "taskId": "recitation"
+          },
+          {
+            "id": "anchor-lang-chinese",
+            "label": "中文阅读"
+          },
+          {
+            "id": "anchor-lang-en-or-fr",
+            "label": "英语/法语阅读（选一，可两项都做）"
+          }
+        ],
+        "reflectionEnabled": true
+      },
+      "tuesday": {
+        "mathItems": [
+          {
+            "id": "anchor-math-homework",
+            "label": "学校数学作业（含课堂配套练习）",
+            "taskId": "homework"
+          },
+          {
+            "id": "anchor-math-hard",
+            "label": "1道难题（钻石/王者模式）",
+            "taskId": "math-hard"
+          }
+        ],
+        "languageItems": [
+          {
+            "id": "anchor-lang-recitation",
+            "label": "背诵",
+            "taskId": "recitation"
+          },
+          {
+            "id": "anchor-lang-chinese",
+            "label": "中文阅读"
+          },
+          {
+            "id": "anchor-lang-en-or-fr",
+            "label": "英语/法语阅读（选一，可两项都做）"
+          }
+        ],
+        "reflectionEnabled": true
+      },
+      "wednesday": {
+        "mathItems": [
+          {
+            "id": "anchor-math-homework",
+            "label": "学校数学作业（含课堂配套练习）",
+            "taskId": "homework"
+          },
+          {
+            "id": "anchor-math-hard",
+            "label": "1道难题（钻石/王者模式）",
+            "taskId": "math-hard"
+          }
+        ],
+        "languageItems": [
+          {
+            "id": "anchor-lang-recitation",
+            "label": "背诵",
+            "taskId": "recitation"
+          },
+          {
+            "id": "anchor-lang-chinese",
+            "label": "中文阅读"
+          },
+          {
+            "id": "anchor-lang-en-or-fr",
+            "label": "英语/法语阅读（选一，可两项都做）"
+          }
+        ],
+        "reflectionEnabled": true
+      },
+      "thursday": {
+        "mathItems": [
+          {
+            "id": "anchor-math-homework",
+            "label": "学校数学作业（含课堂配套练习）",
+            "taskId": "homework"
+          },
+          {
+            "id": "anchor-math-hard",
+            "label": "1道难题（钻石/王者模式）",
+            "taskId": "math-hard"
+          }
+        ],
+        "languageItems": [
+          {
+            "id": "anchor-lang-recitation",
+            "label": "背诵",
+            "taskId": "recitation"
+          },
+          {
+            "id": "anchor-lang-chinese",
+            "label": "中文阅读"
+          },
+          {
+            "id": "anchor-lang-en-or-fr",
+            "label": "英语/法语阅读（选一，可两项都做）"
+          }
+        ],
+        "reflectionEnabled": true
+      },
+      "friday": {
+        "mathItems": [
+          {
+            "id": "anchor-math-homework",
+            "label": "学校数学作业（含课堂配套练习）",
+            "taskId": "homework"
+          },
+          {
+            "id": "anchor-math-hard",
+            "label": "1道难题（钻石/王者模式）",
+            "taskId": "math-hard"
+          }
+        ],
+        "languageItems": [
+          {
+            "id": "anchor-lang-recitation",
+            "label": "背诵",
+            "taskId": "recitation"
+          },
+          {
+            "id": "anchor-lang-chinese",
+            "label": "中文阅读"
+          },
+          {
+            "id": "anchor-lang-en-or-fr",
+            "label": "英语/法语阅读（选一，可两项都做）"
+          }
+        ],
+        "reflectionEnabled": true
+      },
+      "saturday": {
+        "mathItems": [
+          {
+            "id": "anchor-math-hard",
+            "label": "1道难题（钻石/王者模式）",
+            "taskId": "math-hard"
+          }
+        ],
+        "languageItems": [
+          {
+            "id": "anchor-lang-chinese",
+            "label": "中文阅读"
+          },
+          {
+            "id": "anchor-lang-en-or-fr",
+            "label": "英语/法语阅读（选一，可两项都做）"
+          }
+        ],
+        "reflectionEnabled": true
+      },
+      "sunday": {
+        "mathItems": [
+          {
+            "id": "anchor-math-hard",
+            "label": "1道难题（钻石/王者模式）",
+            "taskId": "math-hard"
+          }
+        ],
+        "languageItems": [
+          {
+            "id": "anchor-lang-chinese",
+            "label": "中文阅读"
+          },
+          {
+            "id": "anchor-lang-en-or-fr",
+            "label": "英语/法语阅读（选一，可两项都做）"
+          }
+        ],
+        "reflectionEnabled": true
+      }
+    }
+  }
+]
