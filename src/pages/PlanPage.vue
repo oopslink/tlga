@@ -174,41 +174,34 @@
 
   <!-- 打印视图（屏幕隐藏，打印时显示） -->
   <div class="print-view" v-if="planStore.plan">
-    <div class="print-header">
-      <div class="print-title">本周计划</div>
-      <div class="print-meta">
-        <span>姓名：{{ playerStore.player?.name ?? '小学霸' }}</span>
-        <span>{{ formatWeekCN(planStore.plan.weekId) }}</span>
-        <span>{{ getWeekRangeCN(planStore.plan.weekId) }}</span>
-      </div>
-    </div>
+    <h1 class="print-week-title">
+      {{ planStore.plan.weekId }}（{{ planStore.plan.startDate }} 至 {{ planStore.plan.endDate }}，状态：{{ statusText }}）
+    </h1>
 
-    <table class="print-table">
-      <thead>
-        <tr>
-          <th class="print-task-col">任务</th>
-          <th v-for="dp in planStore.plan.dailyPlans" :key="dp.date" class="print-day-col">
-            {{ getDayLabel(dp.date) }}<br>
-            <span class="print-date-small">{{ getMonthDay(dp.date) }}</span>
-          </th>
-          <th class="print-gold-col">预计金币</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in printData.rows" :key="row.taskId || row.label">
-          <td class="print-task-name">{{ row.label }}</td>
-          <td v-for="(cell, i) in row.cells" :key="i" class="print-cell">{{ cell }}</td>
-          <td class="print-row-gold">{{ row.gold > 0 ? row.gold : '' }}</td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr class="print-gold-row">
-          <td>预计金币</td>
-          <td v-for="(gold, i) in printData.dailyGold" :key="i">{{ gold > 0 ? gold : '' }}</td>
-          <td>{{ totalGold }}</td>
-        </tr>
-      </tfoot>
-    </table>
+    <div
+      v-for="dp in planStore.plan.dailyPlans"
+      :key="dp.date"
+      class="print-day-block"
+    >
+      <h2 class="print-day-title">{{ formatDateLong(dp.date) }}</h2>
+      <table class="print-day-table">
+        <thead>
+          <tr>
+            <th class="print-col-task">任务内容</th>
+            <th class="print-col-target">目标要求</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(task, i) in dp.tasks" :key="i">
+            <td class="print-task-name">{{ task.isLocked ? task.note : getTaskName(task.taskId) }}</td>
+            <td class="print-task-target">{{ task.isLocked ? (task.targetVariant ?? '') : (task.note || task.targetVariant || '') }}</td>
+          </tr>
+          <tr v-if="dp.tasks.length === 0">
+            <td colspan="2" class="print-no-tasks">（无任务）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -222,7 +215,6 @@ import { CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory, type DailyPlan } fro
 import { formatDateCN, currentWeek, today, formatWeekCN, getWeekRangeCN } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
 import { useTemplates } from '@/composables/useTemplates'
-import { buildPrintRows } from '@/utils/print-plan'
 
 const { showAlert, showConfirm, showPrompt } = useModal()
 const templateStore = useTemplates()
@@ -248,14 +240,11 @@ const statusText = computed(() => {
   return m[planStore.plan?.status ?? ''] ?? ''
 })
 
-const printData = computed(() => {
-  if (!planStore.plan) return { rows: [], dailyGold: Array(7).fill(0) }
-  return buildPrintRows(planStore.plan)
-})
-
-const totalGold = computed(() =>
-  printData.value.dailyGold.reduce((s, g) => s + g, 0)
-)
+function formatDateLong(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00')
+  const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+  return `${dateStr} ${days[d.getDay()]}`
+}
 
 function handlePrint() {
   window.print()
@@ -1034,94 +1023,88 @@ onMounted(async () => {
   }
 
   .print-view {
+    display: block !important;
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
+    font-family: sans-serif;
+    color: #000;
   }
 
   @page {
-    size: A4 landscape;
-    margin: 1cm;
+    size: A4 portrait;
+    margin: 1.5cm 2cm;
   }
 
-  .print-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #333;
-  }
-
-  .print-title {
-    font-size: 20px;
+  /* 周标题 */
+  .print-week-title {
+    font-size: 14px;
     font-weight: 700;
+    margin: 0 0 16px 0;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #000;
   }
 
-  .print-meta {
-    display: flex;
-    gap: 20px;
-    font-size: 13px;
-    color: #555;
+  /* 每日区块 */
+  .print-day-block {
+    margin-bottom: 14px;
+    break-inside: avoid;
   }
 
-  .print-table {
+  /* 日期标题 */
+  .print-day-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    padding: 3px 0;
+    border-bottom: 1px solid #999;
+  }
+
+  /* 每日任务表格 */
+  .print-day-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 11px;
+    table-layout: fixed;
   }
 
-  .print-table th,
-  .print-table td {
-    border: 1px solid #ccc;
-    padding: 6px 8px;
-    text-align: center;
-    vertical-align: middle;
+  .print-day-table th,
+  .print-day-table td {
+    border: 1px solid #bbb;
+    padding: 4px 8px;
+    vertical-align: top;
   }
 
-  .print-task-col {
-    width: 120px;
+  .print-col-task {
+    width: 40%;
+    background: #f0f0f0;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .print-col-target {
+    width: 60%;
+    background: #f0f0f0;
+    font-weight: 700;
     text-align: left;
   }
 
   .print-task-name {
-    text-align: left;
     font-weight: 600;
-    white-space: nowrap;
+    text-align: left;
   }
 
-  .print-day-col {
-    min-width: 70px;
-    background: #f5f5f5;
-    font-weight: 700;
+  .print-task-target {
+    text-align: left;
+    color: #333;
   }
 
-  .print-date-small {
+  .print-no-tasks {
+    text-align: center;
+    color: #999;
     font-size: 10px;
-    font-weight: 400;
-    color: #666;
-  }
-
-  .print-gold-col {
-    width: 60px;
-    background: #fff9e6;
-    font-weight: 700;
-  }
-
-  .print-cell {
-    font-size: 11px;
-  }
-
-  .print-row-gold {
-    background: #fff9e6;
-    font-weight: 700;
-  }
-
-  .print-gold-row td {
-    background: #fef3cd;
-    font-weight: 700;
-    font-size: 13px;
+    padding: 6px;
   }
 }
 </style>
