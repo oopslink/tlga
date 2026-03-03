@@ -166,9 +166,49 @@
           </button>
         </template>
         <button class="btn-action btn-danger" @click="handleDelete">🗑️ 清空</button>
+        <button class="btn-action btn-print" @click="handlePrint">🖨️ 打印计划</button>
       </div>
 
     </template>
+  </div>
+
+  <!-- 打印视图（屏幕隐藏，打印时显示） -->
+  <div class="print-view" v-if="planStore.plan">
+    <div class="print-header">
+      <div class="print-title">本周计划</div>
+      <div class="print-meta">
+        <span>姓名：{{ playerStore.player?.name ?? '小学霸' }}</span>
+        <span>{{ formatWeekCN(planStore.plan.weekId) }}</span>
+        <span>{{ getWeekRangeCN(planStore.plan.weekId) }}</span>
+      </div>
+    </div>
+
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th class="print-task-col">任务</th>
+          <th v-for="dp in planStore.plan.dailyPlans" :key="dp.date" class="print-day-col">
+            {{ getDayLabel(dp.date) }}<br>
+            <span class="print-date-small">{{ getMonthDay(dp.date) }}</span>
+          </th>
+          <th class="print-gold-col">预计金币</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="row in printData.rows" :key="row.taskId || row.label">
+          <td class="print-task-name">{{ row.label }}</td>
+          <td v-for="(cell, i) in row.cells" :key="i" class="print-cell">{{ cell }}</td>
+          <td class="print-row-gold">{{ rowGold(row) > 0 ? rowGold(row) : '' }}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr class="print-gold-row">
+          <td>预计金币</td>
+          <td v-for="(gold, i) in printData.dailyGold" :key="i">{{ gold > 0 ? gold : '' }}</td>
+          <td>{{ totalGold }}</td>
+        </tr>
+      </tfoot>
+    </table>
   </div>
 </template>
 
@@ -176,11 +216,13 @@
 import { onMounted, reactive, ref, computed } from 'vue'
 import { usePlanStore } from '@/stores/plan.store'
 import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
+import { usePlayerStore } from '@/stores/player.store'
 import { getTaskById, getTasksByCategory } from '@/utils/tasks'
-import { CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory, type DailyPlan } from '@/types/tasks'
-import { formatDateCN, currentWeek, today } from '@/utils/date'
+import { CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory, type DailyPlan, TASK_DEFINITIONS } from '@/types/tasks'
+import { formatDateCN, currentWeek, today, formatWeekCN, getWeekRangeCN } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
 import { useTemplates } from '@/composables/useTemplates'
+import { buildPrintRows, type PrintRow } from '@/utils/print-plan'
 
 const { showAlert, showConfirm, showPrompt } = useModal()
 const templateStore = useTemplates()
@@ -188,6 +230,7 @@ const templateState = reactive<Record<string, string>>({})
 
 const planStore = usePlanStore()
 const taskDefinitionsStore = useTaskDefinitionsStore()
+const playerStore = usePlayerStore()
 const categories: TaskCategory[] = ['academic', 'sports', 'language', 'art', 'behavior']
 
 const addState = reactive<Record<string, { taskId: string; note: string }>>({})
@@ -204,6 +247,37 @@ const statusText = computed(() => {
   const m: Record<string, string> = { draft: '草稿', active: '进行中', completed: '已完成' }
   return m[planStore.plan?.status ?? ''] ?? ''
 })
+
+const printData = computed(() => {
+  if (!planStore.plan) return { rows: [], dailyGold: Array(7).fill(0) }
+  return buildPrintRows(planStore.plan)
+})
+
+const totalGold = computed(() =>
+  printData.value.dailyGold.reduce((s, g) => s + g, 0)
+)
+
+function rowGold(row: PrintRow): number {
+  if (row.isLocked || !row.taskId) return 0
+  const task = TASK_DEFINITIONS.find(t => t.id === row.taskId)
+  if (!task) return 0
+  let total = 0
+  planStore.plan?.dailyPlans.forEach(dp => {
+    const item = dp.tasks.find(t => t.taskId === row.taskId)
+    if (!item) return
+    if (item.targetVariant && task.variants) {
+      const v = task.variants.find(v => v.level === item.targetVariant)
+      total += v ? v.gold : task.gold
+    } else {
+      total += task.gold
+    }
+  })
+  return total
+}
+
+function handlePrint() {
+  window.print()
+}
 
 function selectDay(date: string) {
   selectedDate.value = selectedDate.value === date ? '' : date
@@ -290,6 +364,7 @@ async function applyTemplateToAll(date: string) {
 onMounted(async () => {
   taskDefinitionsStore.load()
   templateStore.load()
+  playerStore.load()
   await planStore.loadWeek(currentWeek())
   if (planStore.plan) {
     for (const dp of planStore.plan.dailyPlans) {
@@ -919,6 +994,15 @@ onMounted(async () => {
   margin-top: 4px;
 }
 
+.btn-print {
+  background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+  color: white;
+}
+
+.btn-print:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(74, 144, 217, 0.4);
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .week-nav {
@@ -946,6 +1030,109 @@ onMounted(async () => {
 
   .btn-add {
     width: 100%;
+  }
+}
+</style>
+
+<style>
+/* ── 打印视图（屏幕隐藏） ── */
+.print-view {
+  display: none;
+}
+
+/* ── 打印时：隐藏应用，显示打印视图 ── */
+@media print {
+  #app > div:not(.print-view),
+  nav {
+    display: none !important;
+  }
+
+  .print-view {
+    display: block !important;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 1cm;
+  }
+
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #333;
+  }
+
+  .print-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .print-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #555;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .print-task-col {
+    width: 120px;
+    text-align: left;
+  }
+
+  .print-task-name {
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .print-day-col {
+    min-width: 70px;
+    background: #f5f5f5;
+    font-weight: 700;
+  }
+
+  .print-date-small {
+    font-size: 10px;
+    font-weight: 400;
+    color: #666;
+  }
+
+  .print-gold-col {
+    width: 60px;
+    background: #fff9e6;
+    font-weight: 700;
+  }
+
+  .print-cell {
+    font-size: 11px;
+  }
+
+  .print-row-gold {
+    background: #fff9e6;
+    font-weight: 700;
+  }
+
+  .print-gold-row td {
+    background: #fef3cd;
+    font-weight: 700;
+    font-size: 13px;
   }
 }
 </style>
