@@ -198,7 +198,7 @@
         <tr v-for="row in printData.rows" :key="row.taskId || row.label">
           <td class="print-task-name">{{ row.label }}</td>
           <td v-for="(cell, i) in row.cells" :key="i" class="print-cell">{{ cell }}</td>
-          <td class="print-row-gold">{{ rowGold(row) > 0 ? rowGold(row) : '' }}</td>
+          <td class="print-row-gold">{{ row.gold > 0 ? row.gold : '' }}</td>
         </tr>
       </tbody>
       <tfoot>
@@ -218,11 +218,11 @@ import { usePlanStore } from '@/stores/plan.store'
 import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
 import { usePlayerStore } from '@/stores/player.store'
 import { getTaskById, getTasksByCategory } from '@/utils/tasks'
-import { CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory, type DailyPlan, TASK_DEFINITIONS } from '@/types/tasks'
+import { CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory, type DailyPlan } from '@/types/tasks'
 import { formatDateCN, currentWeek, today, formatWeekCN, getWeekRangeCN } from '@/utils/date'
 import { useModal } from '@/composables/useModal'
 import { useTemplates } from '@/composables/useTemplates'
-import { buildPrintRows, type PrintRow } from '@/utils/print-plan'
+import { buildPrintRows } from '@/utils/print-plan'
 
 const { showAlert, showConfirm, showPrompt } = useModal()
 const templateStore = useTemplates()
@@ -256,24 +256,6 @@ const printData = computed(() => {
 const totalGold = computed(() =>
   printData.value.dailyGold.reduce((s, g) => s + g, 0)
 )
-
-function rowGold(row: PrintRow): number {
-  if (row.isLocked || !row.taskId) return 0
-  const task = TASK_DEFINITIONS.find(t => t.id === row.taskId)
-  if (!task) return 0
-  let total = 0
-  planStore.plan?.dailyPlans.forEach(dp => {
-    const item = dp.tasks.find(t => t.taskId === row.taskId)
-    if (!item) return
-    if (item.targetVariant && task.variants) {
-      const v = task.variants.find(v => v.level === item.targetVariant)
-      total += v ? v.gold : task.gold
-    } else {
-      total += task.gold
-    }
-  })
-  return total
-}
 
 function handlePrint() {
   window.print()
@@ -1042,13 +1024,20 @@ onMounted(async () => {
 
 /* ── 打印时：隐藏应用，显示打印视图 ── */
 @media print {
-  #app > div:not(.print-view),
-  nav {
-    display: none !important;
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-view,
+  .print-view * {
+    visibility: visible !important;
   }
 
   .print-view {
-    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
   }
 
   @page {

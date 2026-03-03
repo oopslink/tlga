@@ -73,6 +73,14 @@ describe('buildPrintRows', () => {
     expect(dailyGold[1]).toBe(3)   // homework(1) + piano 30min(2)
   })
 
+  it('sets row.gold to sum of gold across all days', () => {
+    const plan = makePlan()
+    plan.dailyPlans[0].tasks = [{ taskId: 'homework', note: '' }]
+    plan.dailyPlans[1].tasks = [{ taskId: 'homework', note: '' }]
+    const { rows } = buildPrintRows(plan)
+    expect(rows[0].gold).toBe(2)  // homework(1) * 2 days
+  })
+
   it('handles locked tasks as separate rows keyed by note', () => {
     const plan = makePlan()
     plan.dailyPlans[1].tasks = [{ taskId: '', note: '学校数学作业', isLocked: true }]

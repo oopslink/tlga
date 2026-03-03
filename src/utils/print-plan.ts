@@ -6,6 +6,7 @@ export interface PrintRow {
   label: string
   cells: string[]     // 7 cells, one per day
   isLocked: boolean
+  gold: number
 }
 
 export interface PrintData {
@@ -42,8 +43,8 @@ export function buildPrintRows(plan: WeeklyPlan): PrintData {
   const dailyGold: number[] = Array(7).fill(0)
 
   plan.dailyPlans.forEach((dp, dayIdx) => {
+    if (dayIdx >= 7) return
     dp.tasks.forEach(item => {
-      if (dayIdx >= 7) return
       const key = item.isLocked ? `locked:${item.note || item.taskId || 'unknown'}` : `task:${item.taskId}`
 
       if (!keyToIndex.has(key)) {
@@ -54,6 +55,7 @@ export function buildPrintRows(plan: WeeklyPlan): PrintData {
           label,
           cells: Array(7).fill(''),
           isLocked: !!item.isLocked,
+          gold: 0,
         })
       }
 
@@ -61,7 +63,9 @@ export function buildPrintRows(plan: WeeklyPlan): PrintData {
       row.cells[dayIdx] = cellContent(item)
 
       if (!item.isLocked && item.taskId) {
-        dailyGold[dayIdx] += getTaskGold(item.taskId, item.targetVariant)
+        const g = getTaskGold(item.taskId, item.targetVariant)
+        dailyGold[dayIdx] += g
+        row.gold += g
       }
     })
   })
