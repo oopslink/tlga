@@ -43,7 +43,8 @@ export function buildPrintRows(plan: WeeklyPlan): PrintData {
 
   plan.dailyPlans.forEach((dp, dayIdx) => {
     dp.tasks.forEach(item => {
-      const key = item.isLocked ? `locked:${item.note}` : `task:${item.taskId}`
+      if (dayIdx >= 7) return
+      const key = item.isLocked ? `locked:${item.note || item.taskId || 'unknown'}` : `task:${item.taskId}`
 
       if (!keyToIndex.has(key)) {
         const label = item.isLocked ? item.note : getTaskName(item.taskId)
