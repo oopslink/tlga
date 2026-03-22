@@ -1,13 +1,33 @@
 <script setup lang="ts">
-import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
+import { onLaunch, onShow } from '@dcloudio/uni-app'
+import { useAuthStore } from './stores/auth.store'
+import { usePlayerStore } from './stores/player.store'
+
+const authStore = useAuthStore()
+const playerStore = usePlayerStore()
+
+let isLaunching = true
+
 onLaunch(() => {
-  console.log("App Launch");
-});
+  authStore.init()
+  if (!authStore.isAuthenticated) {
+    uni.reLaunch({ url: '/pages/login/index' })
+  } else {
+    playerStore.load()
+  }
+  // Allow onShow to run after first launch
+  setTimeout(() => { isLaunching = false }, 500)
+})
+
 onShow(() => {
-  console.log("App Show");
-});
-onHide(() => {
-  console.log("App Hide");
-});
+  // Guard against false triggers during launch and from uni.switchTab
+  if (isLaunching) return
+  if (!authStore.isAuthenticated) {
+    uni.reLaunch({ url: '/pages/login/index' })
+  }
+})
 </script>
-<style></style>
+
+<template>
+  <view></view>
+</template>
