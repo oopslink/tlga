@@ -1,16 +1,30 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "uni-app"
-			}
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	}
+  "pages": [
+    { "path": "pages/login/index", "style": { "navigationBarTitleText": "登录", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/index/index", "style": { "navigationBarTitleText": "仪表盘", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/plan/index", "style": { "navigationBarTitleText": "本周计划", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/progress/index", "style": { "navigationBarTitleText": "每日进度", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/approve/index", "style": { "navigationBarTitleText": "评分", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/settings/index", "style": { "navigationBarTitleText": "设置", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/history-list/index", "style": { "navigationBarTitleText": "历史记录", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/history/index", "style": { "navigationBarTitleText": "周详情", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/thinking-archive/index", "style": { "navigationBarTitleText": "思维档案", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/templates/index", "style": { "navigationBarTitleText": "计划模板", "navigationBarBackgroundColor": "#1a1a2e" } }
+  ],
+  "tabBar": {
+    "color": "#888",
+    "selectedColor": "#ff6b9d",
+    "backgroundColor": "#1a1a2e",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "仪表盘" },
+      { "pagePath": "pages/plan/index", "text": "周计划" },
+      { "pagePath": "pages/progress/index", "text": "每日进度" },
+      { "pagePath": "pages/approve/index", "text": "评分" }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarBackgroundColor": "#1a1a2e",
+    "backgroundColor": "#0f0f23"
+  }
 }
