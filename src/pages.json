@@ -16,10 +16,10 @@
     "selectedColor": "#ff6b9d",
     "backgroundColor": "#1a1a2e",
     "list": [
-      { "pagePath": "pages/index/index", "text": "仪表盘" },
-      { "pagePath": "pages/plan/index", "text": "周计划" },
-      { "pagePath": "pages/progress/index", "text": "每日进度" },
-      { "pagePath": "pages/approve/index", "text": "评分" }
+      { "pagePath": "pages/index/index", "text": "仪表盘", "iconPath": "static/tabbar/tab-home.png", "selectedIconPath": "static/tabbar/tab-home-active.png" },
+      { "pagePath": "pages/plan/index", "text": "周计划", "iconPath": "static/tabbar/tab-plan.png", "selectedIconPath": "static/tabbar/tab-plan-active.png" },
+      { "pagePath": "pages/progress/index", "text": "每日进度", "iconPath": "static/tabbar/tab-progress.png", "selectedIconPath": "static/tabbar/tab-progress-active.png" },
+      { "pagePath": "pages/approve/index", "text": "评分", "iconPath": "static/tabbar/tab-approve.png", "selectedIconPath": "static/tabbar/tab-approve-active.png" }
     ]
   },
   "globalStyle": {

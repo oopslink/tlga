@@ -206,7 +206,7 @@ h1, h2, h3, h4,
 .loading {
   text-align: center;
   padding: 60rpx 40rpx;
-  font-size: 1.2rem;
+  font-size: 38rpx;
   color: var(--color-primary);
 }
 
@@ -268,7 +268,7 @@ h1, h2, h3, h4,
   gap: 6rpx;
   padding: 6rpx 14rpx;
   border-radius: 20rpx;
-  font-size: 0.85rem;
+  font-size: 27rpx;
   font-weight: 700;
   background: var(--gradient-primary);
   color: var(--color-text-inverse);
@@ -286,7 +286,7 @@ h1, h2, h3, h4,
   border-radius: 8rpx;
   background: rgba(255, 107, 157, 0.1);
   color: var(--color-primary);
-  font-size: 1rem;
+  font-size: 32rpx;
   flex-shrink: 0;
 }
 
@@ -297,7 +297,7 @@ h1, h2, h3, h4,
 .btn-icon.btn-icon-sm {
   width: 56rpx;
   height: 56rpx;
-  font-size: 0.9rem;
+  font-size: 29rpx;
 }
 
 .btn-icon.btn-icon-danger {
@@ -334,7 +334,7 @@ h1, h2, h3, h4,
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 64rpx;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -360,7 +360,7 @@ h1, h2, h3, h4,
 .breakdown-item:last-child {
   border-bottom: none;
   font-weight: 700;
-  font-size: 1.3rem;
+  font-size: 42rpx;
   padding-top: 16rpx;
   margin-top: 8rpx;
   border-top: 3rpx solid var(--color-gold);
