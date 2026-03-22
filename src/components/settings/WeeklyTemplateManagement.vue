@@ -111,8 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { ref, computed, onMounted } from 'vue'
 import { useWeeklyTemplateStore } from '@/stores/weekly-template.store'
 import type { WeeklyTemplate, DayTemplateConfig, WeekdayKey } from '@/types/tasks'
 import { useModal } from '@/composables/useModal'
@@ -194,7 +193,7 @@ function removeLanguageItem(i: number) {
   currentDayConfig.value?.languageItems.splice(i, 1)
 }
 
-onLoad(() => store.load())
+onMounted(() => store.load())
 </script>
 
 <style scoped>

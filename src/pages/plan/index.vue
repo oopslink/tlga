@@ -750,7 +750,6 @@ onLoad(async () => {
   border-radius: 14px;
   font-size: 15px;
   font-weight: 700;
-  cursor: pointer;
   border: none;
 }
 

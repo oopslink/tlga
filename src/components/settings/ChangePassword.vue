@@ -102,69 +102,71 @@ function handleSubmit() {
 
 <style scoped>
 .change-password {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--color-bg-card);
+  border-radius: 24rpx;
+  padding: 48rpx;
+  box-shadow: var(--shadow-sm);
 }
 
 .section-title {
   display: block;
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 18px;
+  margin-bottom: 40rpx;
+  color: var(--color-primary);
+  font-size: 36rpx;
   font-weight: 600;
 }
 
 .password-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32rpx;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12rpx;
 }
 
 .form-label {
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: 600;
-  color: #555;
+  color: var(--color-text);
 }
 
 .form-input {
-  padding: 10px 14px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 20rpx 28rpx;
+  border: 2rpx solid rgba(255, 107, 157, 0.15);
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
 }
 
 .error-message {
-  background: #fee;
-  color: #c33;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 14px;
+  background: rgba(239, 71, 111, 0.1);
+  color: var(--color-danger);
+  padding: 20rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
 }
 
 .success-message {
-  background: #efe;
-  color: #3c3;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 14px;
+  background: rgba(6, 214, 160, 0.1);
+  color: var(--color-success);
+  padding: 20rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
 }
 
 .submit-btn {
-  padding: 12px;
-  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+  padding: 24rpx;
+  background: var(--gradient-primary);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 16rpx;
+  font-size: 30rpx;
   font-weight: 600;
-  margin-top: 8px;
+  margin-top: 16rpx;
 }
 </style>

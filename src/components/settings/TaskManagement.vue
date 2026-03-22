@@ -154,8 +154,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { ref, computed, onMounted } from 'vue'
 import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
 import { TASK_DEFINITIONS, CATEGORY_NAMES, CATEGORY_ICONS, type TaskCategory, type TaskDefinition, type TaskVariant } from '@/types/tasks'
 import { useModal } from '@/composables/useModal'
@@ -273,7 +272,7 @@ async function saveTask() {
   closeDialog()
 }
 
-onLoad(() => {
+onMounted(() => {
   taskStore.load()
 })
 </script>

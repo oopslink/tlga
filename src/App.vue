@@ -15,8 +15,7 @@ onLaunch(() => {
   } else {
     playerStore.load()
   }
-  // Allow onShow to run after first launch
-  setTimeout(() => { isLaunching = false }, 500)
+  isLaunching = false
 })
 
 onShow(() => {

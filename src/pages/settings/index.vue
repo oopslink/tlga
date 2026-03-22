@@ -56,6 +56,16 @@
     <view v-if="currentTab === 'password'" class="tab-content">
       <ChangePassword />
     </view>
+
+    <!-- 底部操作区 -->
+    <view class="bottom-actions">
+      <view class="action-btn action-btn-danger" @click="handleClearData">
+        <text>🗑️ 清除所有数据</text>
+      </view>
+      <view class="action-btn action-btn-logout" @click="handleLogout">
+        <text>🚪 退出登录</text>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -65,8 +75,35 @@ import TaskManagement from '@/components/settings/TaskManagement.vue'
 import TemplateManagement from '@/components/settings/TemplateManagement.vue'
 import WeeklyTemplateManagement from '@/components/settings/WeeklyTemplateManagement.vue'
 import ChangePassword from '@/components/settings/ChangePassword.vue'
+import { useAuthStore } from '@/stores/auth.store'
+import { useModal } from '@/composables/useModal'
+
+const authStore = useAuthStore()
+const { showConfirm } = useModal()
 
 const currentTab = ref<'history' | 'tasks' | 'templates' | 'password'>('history')
+
+async function handleLogout() {
+  if (await showConfirm('确认退出登录？')) {
+    authStore.logout()
+    uni.reLaunch({ url: '/pages/login/index' })
+  }
+}
+
+async function handleClearData() {
+  if (await showConfirm('确认清除所有数据？此操作不可恢复！')) {
+    if (await showConfirm('再次确认：清除后所有记录将永久丢失，是否继续？')) {
+      const keys = wx.getStorageInfoSync().keys
+      for (const key of keys) {
+        if (key.startsWith('tlgapp:')) {
+          wx.removeStorageSync(key)
+        }
+      }
+      authStore.clearAll()
+      uni.reLaunch({ url: '/pages/login/index' })
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -125,5 +162,44 @@ const currentTab = ref<'history' | 'tasks' | 'templates' | 'password'>('history'
   border: none;
   border-top: 2px dashed rgba(255, 107, 157, 0.12);
   margin: 28px 0;
+}
+
+.bottom-actions {
+  margin-top: 48rpx;
+  padding-top: 32rpx;
+  border-top: 2px solid rgba(255, 107, 157, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.action-btn-danger {
+  background: rgba(239, 71, 111, 0.08);
+  color: var(--color-danger);
+  border: 2rpx solid rgba(239, 71, 111, 0.2);
+}
+
+.action-btn-danger:active {
+  background: rgba(239, 71, 111, 0.15);
+}
+
+.action-btn-logout {
+  background: rgba(136, 136, 136, 0.08);
+  color: var(--color-text-dim);
+  border: 2rpx solid rgba(136, 136, 136, 0.2);
+}
+
+.action-btn-logout:active {
+  background: rgba(136, 136, 136, 0.15);
 }
 </style>

@@ -133,8 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { ref, computed, onMounted } from 'vue'
 import { useTemplates } from '@/composables/useTemplates'
 import { useTaskDefinitionsStore } from '@/stores/task-definitions.store'
 import { getTaskById, getTasksByCategory as getTasksByCategoryUtil } from '@/utils/tasks'
@@ -261,7 +260,7 @@ async function saveTemplate() {
   closeDialog()
 }
 
-onLoad(() => {
+onMounted(() => {
   taskDefinitionsStore.load()
   templateStore.load()
 })

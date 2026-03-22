@@ -99,36 +99,35 @@ function handleSubmit() {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
+  padding: 40rpx;
 }
 
 .login-card {
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  padding: 40px;
+  border-radius: 40rpx;
+  box-shadow: 0 40rpx 120rpx rgba(0, 0, 0, 0.3);
+  padding: 80rpx;
   width: 100%;
-  max-width: 420px;
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 60rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .login-title {
-  font-size: 28px;
+  font-size: 56rpx;
   color: #333;
-  margin: 0 0 10px 0;
+  margin: 0 0 20rpx 0;
   font-weight: 700;
   display: block;
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: 32rpx;
   color: #666;
   margin: 0;
   display: block;
@@ -137,27 +136,27 @@ function handleSubmit() {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 40rpx;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16rpx;
 }
 
 .form-label {
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: 600;
   color: #333;
   display: block;
 }
 
 .form-input {
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 16px;
+  padding: 24rpx 32rpx;
+  border: 2rpx solid #e0e0e0;
+  border-radius: 20rpx;
+  font-size: 32rpx;
   width: 100%;
   box-sizing: border-box;
 }
@@ -165,30 +164,30 @@ function handleSubmit() {
 .error-message {
   background: #fee;
   color: #c33;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
   text-align: center;
 }
 
 .submit-btn {
-  padding: 14px;
+  padding: 28rpx;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 16px;
+  border-radius: 20rpx;
+  font-size: 32rpx;
   font-weight: 600;
-  margin-top: 10px;
+  margin-top: 20rpx;
 }
 
 .login-footer {
-  margin-top: 30px;
+  margin-top: 60rpx;
   text-align: center;
 }
 
 .tip {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #999;
   display: block;
 }

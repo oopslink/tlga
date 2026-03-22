@@ -1,7 +1,7 @@
 {
   "pages": [
-    { "path": "pages/login/index", "style": { "navigationBarTitleText": "登录", "navigationBarBackgroundColor": "#1a1a2e" } },
     { "path": "pages/index/index", "style": { "navigationBarTitleText": "仪表盘", "navigationBarBackgroundColor": "#1a1a2e" } },
+    { "path": "pages/login/index", "style": { "navigationBarTitleText": "登录", "navigationBarBackgroundColor": "#1a1a2e" } },
     { "path": "pages/plan/index", "style": { "navigationBarTitleText": "本周计划", "navigationBarBackgroundColor": "#1a1a2e" } },
     { "path": "pages/progress/index", "style": { "navigationBarTitleText": "每日进度", "navigationBarBackgroundColor": "#1a1a2e" } },
     { "path": "pages/approve/index", "style": { "navigationBarTitleText": "评分", "navigationBarBackgroundColor": "#1a1a2e" } },
