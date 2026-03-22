@@ -10,14 +10,14 @@ export function useTemplates() {
   function load() {
     if (loaded) return
     try {
-      const data = localStorage.getItem(STORAGE_KEY)
+      const data = wx.getStorageSync(STORAGE_KEY)
       if (data) templates.value = JSON.parse(data)
       loaded = true
     } catch { templates.value = []; loaded = true }
   }
 
   function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(templates.value))
+    wx.setStorageSync(STORAGE_KEY, JSON.stringify(templates.value))
   }
 
   function addTemplate(name: string, tasks: PlannedTaskItem[], description = ''): DailyTemplate {
