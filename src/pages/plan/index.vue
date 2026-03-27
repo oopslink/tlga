@@ -30,9 +30,8 @@
         >
           <text class="day-cell-label">{{ getDayLabel(dp.date) }}</text>
           <text class="day-cell-date">{{ getMonthDay(dp.date) }}</text>
-          <view class="day-cell-count">
-            <text v-if="dp.tasks.length > 0" class="count-badge">{{ dp.tasks.length }}</text>
-            <text v-else class="count-empty">—</text>
+          <view class="day-cell-dot">
+            <view class="dot" :class="{ 'dot-filled': dp.tasks.length > 0 }"></view>
           </view>
         </view>
       </view>
@@ -471,30 +470,27 @@ onLoad(async () => {
   display: block;
 }
 
-.day-cell-count {
-  min-height: 22px;
+.day-cell-dot {
+  min-height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 4px;
 }
 
-.count-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  background: var(--gradient-primary);
-  color: white;
+.dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  font-size: 12px;
-  font-weight: 700;
+  background: rgba(136, 136, 136, 0.35);
 }
 
-.count-empty {
-  font-size: 12px;
-  color: var(--color-text-dim);
-  opacity: 0.4;
+.dot-filled {
+  background: var(--color-primary);
+}
+
+.day-cell.active .dot-filled {
+  background: white;
 }
 
 /* 详情面板 */

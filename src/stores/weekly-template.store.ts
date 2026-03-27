@@ -1,12 +1,13 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref, computed } from 'vue'
+import { pinia } from './pinia-instance'
 import type { WeeklyTemplate, DayTemplateConfig, WeekdayKey } from '@/types/tasks'
 import { storage } from '@/services/storage-factory'
 import { DEFAULT_WEEKLY_TEMPLATE } from '@/data/default-weekly-template'
 
 const STORAGE_PATH = 'weekly-templates.json'
 
-export const useWeeklyTemplateStore = defineStore('weekly-template', () => {
+const _useWeeklyTemplateStore = defineStore('weekly-template', () => {
   const templates = ref<WeeklyTemplate[]>([])
   const loading = ref(false)
 
@@ -98,3 +99,8 @@ export const useWeeklyTemplateStore = defineStore('weekly-template', () => {
     setDefault,
   }
 })
+
+export function useWeeklyTemplateStore() {
+  setActivePinia(pinia)
+  return _useWeeklyTemplateStore()
+}

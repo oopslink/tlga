@@ -1,5 +1,6 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref, computed } from 'vue'
+import { pinia } from './pinia-instance'
 
 const STORAGE_KEY = 'app_password'
 const AUTH_SESSION_KEY = 'is_authenticated'
@@ -25,7 +26,7 @@ function toBase64(str: string): string {
   return result
 }
 
-export const useAuthStore = defineStore('auth', () => {
+const _useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   const hasPassword = ref(false)
 
@@ -91,3 +92,8 @@ export const useAuthStore = defineStore('auth', () => {
     clearAll,
   }
 })
+
+export function useAuthStore() {
+  setActivePinia(pinia)
+  return _useAuthStore()
+}

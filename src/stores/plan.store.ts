@@ -1,5 +1,6 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref, computed } from 'vue'
+import { pinia } from './pinia-instance'
 import type { WeeklyPlan, PlannedTaskItem } from '@/types/tasks'
 import { storage } from '@/services/storage-factory'
 import {
@@ -13,7 +14,7 @@ import { useProgressStore } from './progress.store'
 import { useWeeklyTemplateStore } from './weekly-template.store'
 import { useModal } from '@/composables/useModal'
 
-export const usePlanStore = defineStore('plan', () => {
+const _usePlanStore = defineStore('plan', () => {
   const plan = ref<WeeklyPlan | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -125,3 +126,8 @@ export const usePlanStore = defineStore('plan', () => {
 
   return { plan, loading, error, weekId, isActive, isDraft, loadWeek, loadCurrentWeek, save, addTask, removeTask, editTask, activate, reactivate, deletePlan }
 })
+
+export function usePlanStore() {
+  setActivePinia(pinia)
+  return _usePlanStore()
+}

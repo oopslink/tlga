@@ -1,11 +1,12 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref } from 'vue'
+import { pinia } from './pinia-instance'
 import type { TaskDefinition, TaskCategory } from '@/types/tasks'
 import { TASK_DEFINITIONS } from '@/types/tasks'
 
 const STORAGE_KEY = 'custom_tasks'
 
-export const useTaskDefinitionsStore = defineStore('taskDefinitions', () => {
+const _useTaskDefinitionsStore = defineStore('taskDefinitions', () => {
   const customTasks = ref<TaskDefinition[]>([])
   const loaded = ref(false)
 
@@ -96,3 +97,8 @@ export const useTaskDefinitionsStore = defineStore('taskDefinitions', () => {
     load,
   }
 })
+
+export function useTaskDefinitionsStore() {
+  setActivePinia(pinia)
+  return _useTaskDefinitionsStore()
+}

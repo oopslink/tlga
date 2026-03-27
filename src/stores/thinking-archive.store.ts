@@ -1,5 +1,6 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref } from 'vue'
+import { pinia } from './pinia-instance'
 import type { ThinkingArchiveEntry } from '@/types'
 import { storage } from '@/services/storage-factory'
 
@@ -7,7 +8,7 @@ function archivePath(weekId: string) {
   return `weeks/${weekId}/thinking-archive.json`
 }
 
-export const useThinkingArchiveStore = defineStore('thinking-archive', () => {
+const _useThinkingArchiveStore = defineStore('thinking-archive', () => {
   const entries = ref<ThinkingArchiveEntry[]>([])
   const loading = ref(false)
 
@@ -52,3 +53,8 @@ export const useThinkingArchiveStore = defineStore('thinking-archive', () => {
 
   return { entries, loading, loadWeek, addEntry, loadAll }
 })
+
+export function useThinkingArchiveStore() {
+  setActivePinia(pinia)
+  return _useThinkingArchiveStore()
+}

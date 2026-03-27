@@ -1,5 +1,6 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref, computed } from 'vue'
+import { pinia } from './pinia-instance'
 import type { DailyProgressSheet, ProgressTaskItem } from '@/types/tasks'
 import { storage } from '@/services/storage-factory'
 import { usePlayerStore } from './player.store'
@@ -11,7 +12,7 @@ function sheetPath(weekId: string, date: string) {
   return `weeks/${weekId}/progress/${date}.json`
 }
 
-export const useProgressStore = defineStore('progress', () => {
+const _useProgressStore = defineStore('progress', () => {
   const currentSheet = ref<DailyProgressSheet | null>(null)
   const weekSheets = ref<DailyProgressSheet[]>([])
   const loading = ref(false)
@@ -175,3 +176,8 @@ export const useProgressStore = defineStore('progress', () => {
     overrideTask, approveSheet, rejectSheet,
   }
 })
+
+export function useProgressStore() {
+  setActivePinia(pinia)
+  return _useProgressStore()
+}

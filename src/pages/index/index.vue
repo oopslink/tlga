@@ -21,13 +21,10 @@
         <text class="status-badge" :class="planStore.plan.status">{{ planStatusText }}</text>
         <view class="week-grid">
           <view v-for="dp in planStore.plan.dailyPlans" :key="dp.date" class="week-day-cell" :class="dayClass(dp.date)">
-            <text class="day-label">{{ shortDate(dp.date) }}</text>
-            <text class="day-count" v-if="dp.tasks.length">{{ dp.tasks.length }} 项任务</text>
-            <text class="day-count dim" v-else>无</text>
-            <view v-if="sheetMap[dp.date]" class="day-status">
-              <text class="status-dot" :class="sheetMap[dp.date].status"></text>
-              <text>{{ sheetStatusText(sheetMap[dp.date].status) }}</text>
-              <text v-if="sheetMap[dp.date].settled" class="gold"> +{{ sheetMap[dp.date].totalGold }}</text>
+            <text class="day-weekday">{{ weekdayLabel(dp.date) }}</text>
+            <text class="day-date">{{ monthDay(dp.date) }}</text>
+            <view class="day-dot-row">
+              <view class="day-dot" :class="{ 'day-dot-filled': dp.tasks.length > 0 }"></view>
             </view>
           </view>
         </view>
@@ -126,10 +123,14 @@ const approvedSheets = computed(() => progressStore.weekSheets.filter(s => s.sta
 const weekGold = computed(() => approvedSheets.value.reduce((s, sh) => s + sh.totalGold, 0))
 const weekXp = computed(() => approvedSheets.value.reduce((s, sh) => s + sh.totalXp, 0))
 
-function shortDate(date: string) {
-  const d = new Date(date + 'T00:00:00')
+function weekdayLabel(date: string) {
   const days = ['日', '一', '二', '三', '四', '五', '六']
-  return `${d.getMonth() + 1}/${d.getDate()} ${days[d.getDay()]}`
+  return days[new Date(date + 'T00:00:00').getDay()]
+}
+
+function monthDay(date: string) {
+  const d = new Date(date + 'T00:00:00')
+  return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
 function formatDate(d: string) { return formatDateCN(d) }
@@ -159,17 +160,14 @@ onLoad(async () => {
 .card-title { display: block; font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--color-text); }
 .stats-row { display:flex; gap:12px; flex-wrap:wrap; }
 .stats-row .stat-box { flex:1; min-width:120px; }
-.week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:16px; }
-.week-day-cell { background:var(--color-bg); border-radius:8px; padding:12px 8px; text-align:center; }
-.week-day-cell.today { border:2px solid var(--color-primary); }
-.day-label { font-weight:700; margin-bottom:4px; display:block; }
-.day-count { font-size:13px; display:block; }
-.day-status { font-size:12px; margin-top:4px; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; }
-.status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; }
-.status-dot.pending { background:var(--color-text-dim); }
-.status-dot.submitted { background:var(--color-warning); }
-.status-dot.approved { background:var(--color-success); }
-.status-dot.rejected { background:var(--color-primary); }
+.week-grid { display:flex; gap:8rpx; margin-top:16px; }
+.week-day-cell { flex:1; background:var(--color-bg-card); border:2rpx solid rgba(255,107,157,0.08); border-radius:18rpx; padding:14rpx 4rpx; text-align:center; }
+.week-day-cell.today { border-color:var(--color-gold); border-width:3rpx; }
+.day-weekday { display:block; font-size:24rpx; font-weight:600; color:var(--color-text-dim); margin-bottom:4rpx; }
+.day-date { display:block; font-size:26rpx; font-weight:700; color:var(--color-text); }
+.day-dot-row { display:flex; justify-content:center; margin-top:8rpx; }
+.day-dot { width:12rpx; height:12rpx; border-radius:50%; background:rgba(136,136,136,0.25); }
+.day-dot-filled { background:var(--color-primary); }
 .todo-list { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
 .todo-item { display:block; padding:12px 16px; background:var(--color-bg); border-radius:8px; color:var(--color-text); }
 .todo-item.approve { border-left:3px solid var(--color-warning); }

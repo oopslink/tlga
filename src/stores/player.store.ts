@@ -1,9 +1,10 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref } from 'vue'
+import { pinia } from './pinia-instance'
 import type { PlayerState } from '@/types/tasks'
 import { storage } from '@/services/storage-factory'
 
-export const usePlayerStore = defineStore('player', () => {
+const _usePlayerStore = defineStore('player', () => {
   const player = ref<PlayerState | null>(null)
   const loading = ref(false)
 
@@ -35,3 +36,8 @@ export const usePlayerStore = defineStore('player', () => {
 
   return { player, loading, load, save, addRewards }
 })
+
+export function usePlayerStore() {
+  setActivePinia(pinia)
+  return _usePlayerStore()
+}

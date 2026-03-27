@@ -1,5 +1,6 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref, computed } from 'vue'
+import { pinia } from './pinia-instance'
 import type { WeeklyPlan, DailyGoal } from '@/types/tasks'
 import { storage } from '@/services/storage-factory'
 import {
@@ -12,7 +13,7 @@ import {
 } from '@/engine/weekly-plan'
 import { currentWeek } from '@/utils/date'
 
-export const useWeeklyPlanStore = defineStore('weekly-plan', () => {
+const _useWeeklyPlanStore = defineStore('weekly-plan', () => {
   const currentPlan = ref<WeeklyPlan | null>(null)
   const currentWeekId = ref(currentWeek())
   const loading = ref(false)
@@ -103,3 +104,8 @@ export const useWeeklyPlanStore = defineStore('weekly-plan', () => {
     getDayReward,
   }
 })
+
+export function useWeeklyPlanStore() {
+  setActivePinia(pinia)
+  return _useWeeklyPlanStore()
+}

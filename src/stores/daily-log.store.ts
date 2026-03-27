@@ -1,12 +1,13 @@
-import { defineStore } from 'pinia'
+import { defineStore, setActivePinia } from 'pinia'
 import { ref, computed } from 'vue'
+import { pinia } from './pinia-instance'
 import type { DailyLog, HomeworkTask, MathTask, JugglingTask, LanguageTask, RandomDrop } from '@/types'
 import { storage } from '@/services/storage-factory'
 import { calcDailyRewards } from '@/engine/daily-aggregator'
 import { usePlayerStore } from './player.store'
 import { today, getISOWeek, getPreviousDates, getWeekDates } from '@/utils/date'
 
-export const useDailyLogStore = defineStore('daily-log', () => {
+const _useDailyLogStore = defineStore('daily-log', () => {
   const currentLog = ref<DailyLog | null>(null)
   const currentDate = ref(today())
   const loading = ref(false)
@@ -183,3 +184,8 @@ export const useDailyLogStore = defineStore('daily-log', () => {
     removeRandomDrop,
   }
 })
+
+export function useDailyLogStore() {
+  setActivePinia(pinia)
+  return _useDailyLogStore()
+}

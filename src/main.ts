@@ -1,9 +1,9 @@
 import { createSSRApp } from 'vue'
-import { createPinia } from 'pinia'
+import { pinia } from './stores/pinia-instance'
 import App from './App.vue'
 
 export function createApp() {
   const app = createSSRApp(App)
-  app.use(createPinia())
+  app.use(pinia)
   return { app }
 }
