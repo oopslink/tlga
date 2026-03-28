@@ -4,8 +4,8 @@
     <view class="card" v-if="playerStore.player">
       <text class="card-title">{{ playerStore.player.name }}</text>
       <view class="stats-row">
-        <view class="stat-box"><text>金币</text><text class="stat-value gold">{{ playerStore.player.gold }}</text></view>
-        <view class="stat-box"><text>经验值</text><text class="stat-value xp">{{ playerStore.player.xp }}</text></view>
+        <view class="stat-box stat-gold"><text>金币</text><text class="stat-value gold">{{ playerStore.player.gold }}</text></view>
+        <view class="stat-box stat-xp"><text>经验值</text><text class="stat-value xp">{{ playerStore.player.xp }}</text></view>
       </view>
     </view>
 
@@ -55,8 +55,8 @@
       <text class="card-title">本周已结算</text>
       <view class="stats-row">
         <view class="stat-box"><text>已结算天数</text><text class="stat-value">{{ approvedSheets.length }}</text></view>
-        <view class="stat-box"><text>周金币</text><text class="stat-value gold">{{ weekGold }}</text></view>
-        <view class="stat-box"><text>周经验</text><text class="stat-value xp">{{ weekXp }}</text></view>
+        <view class="stat-box stat-gold"><text>周金币</text><text class="stat-value gold">{{ weekGold }}</text></view>
+        <view class="stat-box stat-xp"><text>周经验</text><text class="stat-value xp">{{ weekXp }}</text></view>
       </view>
     </view>
 
@@ -166,8 +166,8 @@ onLoad(async () => {
 .day-weekday { display:block; font-size:24rpx; font-weight:600; color:var(--color-text-dim); margin-bottom:4rpx; }
 .day-date { display:block; font-size:26rpx; font-weight:700; color:var(--color-text); }
 .day-dot-row { display:flex; justify-content:center; margin-top:8rpx; }
-.day-dot { width:12rpx; height:12rpx; border-radius:50%; background:rgba(136,136,136,0.25); }
-.day-dot-filled { background:var(--color-primary); }
+.day-dot { width:14rpx; height:14rpx; border-radius:50%; background:rgba(136,136,136,0.2); }
+.day-dot-filled { background:var(--color-success); box-shadow:0 0 4rpx rgba(6,214,160,0.4); }
 .todo-list { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
 .todo-item { display:block; padding:12px 16px; background:var(--color-bg); border-radius:8px; color:var(--color-text); }
 .todo-item.approve { border-left:3px solid var(--color-warning); }

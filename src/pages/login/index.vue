@@ -94,20 +94,33 @@ function handleSubmit() {
 
 <style scoped>
 .login-container {
-  min-height: 100%;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--gradient-bg);
   padding: 40rpx;
 }
 
 .login-card {
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 40rpx;
-  box-shadow: 0 40rpx 120rpx rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-xl);
+  border: 2rpx solid rgba(255, 107, 157, 0.1);
   padding: 80rpx;
   width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: var(--gradient-primary);
 }
 
 .login-header {
@@ -120,7 +133,7 @@ function handleSubmit() {
 
 .login-title {
   font-size: 56rpx;
-  color: #333;
+  color: var(--color-primary);
   margin: 0 0 20rpx 0;
   font-weight: 700;
   display: block;
@@ -128,7 +141,7 @@ function handleSubmit() {
 
 .subtitle {
   font-size: 32rpx;
-  color: #666;
+  color: var(--color-text-dim);
   margin: 0;
   display: block;
 }
@@ -148,22 +161,25 @@ function handleSubmit() {
 .form-label {
   font-size: 28rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
   display: block;
 }
 
 .form-input {
   padding: 24rpx 32rpx;
-  border: 2rpx solid #e0e0e0;
+  background: var(--color-bg-elevated);
+  border: 2rpx solid rgba(255, 107, 157, 0.15);
   border-radius: 20rpx;
   font-size: 32rpx;
+  color: var(--color-text);
   width: 100%;
   box-sizing: border-box;
 }
 
 .error-message {
-  background: #fee;
-  color: #c33;
+  background: rgba(239, 71, 111, 0.08);
+  color: var(--color-danger);
+  border: 2rpx solid rgba(239, 71, 111, 0.2);
   padding: 24rpx;
   border-radius: 16rpx;
   font-size: 28rpx;
@@ -172,13 +188,19 @@ function handleSubmit() {
 
 .submit-btn {
   padding: 28rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--color-text-inverse);
   border: none;
   border-radius: 20rpx;
   font-size: 32rpx;
-  font-weight: 600;
+  font-weight: 700;
   margin-top: 20rpx;
+  box-shadow: var(--shadow-md);
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-sm);
 }
 
 .login-footer {
@@ -188,7 +210,7 @@ function handleSubmit() {
 
 .tip {
   font-size: 26rpx;
-  color: #999;
+  color: var(--color-text-dim);
   display: block;
 }
 </style>

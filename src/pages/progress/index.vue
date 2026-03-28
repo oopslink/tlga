@@ -41,11 +41,13 @@
       </text>
 
       <!-- 任务列表 -->
-      <view v-for="(task, idx) in sheet.tasks" :key="idx" class="task-card">
+      <view v-for="(task, idx) in sheet.tasks" :key="idx" class="task-card" :class="`cat-${getTaskCategory(task.taskId)}`">
         <view class="task-header">
-          <text class="task-cat">{{ getCatIcon(task.taskId) }}</text>
+          <view class="task-cat-wrap" :class="`cat-icon-${getTaskCategory(task.taskId)}`">
+            <text class="task-cat">{{ getCatIcon(task.taskId) }}</text>
+          </view>
           <view class="task-header-content">
-            <text style="font-weight:bold">{{ getTaskName(task.taskId) }}</text>
+            <text class="task-name-text">{{ getTaskName(task.taskId) }}</text>
             <text v-if="task.targetVariant" class="variant-tag target">目标: {{ task.targetVariant }}</text>
           </view>
         </view>
@@ -220,9 +222,9 @@
       <!-- 操作按钮 -->
       <view class="actions-bar">
         <template v-if="sheet.status !== 'approved'">
-          <button class="button" @click="handleSave">💾 暂存</button>
+          <button class="button" @click="handleSave" :disabled="saving">💾 暂存</button>
           <button class="button btn-submit" @click="handleSubmit"
-                  :disabled="sheet.tasks.every(t => !t.completed)">
+                  :disabled="sheet.tasks.every(t => !t.completed) || saving">
             📤 {{ sheet.status === 'submitted' ? '重新提交' : '提交审批' }}
           </button>
           <text v-if="sheet.status === 'rejected'" class="dim">进度单已驳回，请修改后重新提交</text>
@@ -252,6 +254,7 @@ import {
 } from '@/engine/reflection-anchor'
 
 const { showAlert, showConfirm } = useModal()
+const saving = ref(false)
 
 const progressStore = useProgressStore()
 const planStore = usePlanStore()
@@ -400,6 +403,7 @@ function getSheetStatus(date: string): string {
 
 function getTaskName(id: string) { return getTaskById(id)?.name ?? id }
 function getCatIcon(id: string) { const t = getTaskById(id); return t ? CATEGORY_ICONS[t.category] : '' }
+function getTaskCategory(id: string): string { return getTaskById(id)?.category ?? '' }
 function hasVariants(id: string) { const t = getTaskById(id); return !!(t?.variants && t.variants.length > 0) }
 function getVariants(id: string): TaskVariant[] { return getTaskById(id)?.variants ?? [] }
 
@@ -445,19 +449,30 @@ async function loadData() {
 }
 
 async function handleSave() {
-  if (!sheet.value) return
-  progressStore.updateReflections(buildReflectionsData())
-  progressStore.updateWeeklyReview(buildWeeklyReviewData())
-  await progressStore.saveSheet(sheet.value)
-  await showAlert('已暂存')
+  if (!sheet.value || saving.value) return
+  saving.value = true
+  try {
+    progressStore.updateReflections(buildReflectionsData())
+    progressStore.updateWeeklyReview(buildWeeklyReviewData())
+    await progressStore.saveSheet(sheet.value)
+    await showAlert('已暂存')
+  } finally {
+    saving.value = false
+  }
 }
 
 async function handleSubmit() {
+  if (saving.value) return
   if (!await showConfirm('确认提交？提交后需要审批员审批。')) return
-  progressStore.updateReflections(buildReflectionsData())
-  progressStore.updateWeeklyReview(buildWeeklyReviewData())
-  await progressStore.submitSheet()
-  await showAlert('已提交，等待审批')
+  saving.value = true
+  try {
+    progressStore.updateReflections(buildReflectionsData())
+    progressStore.updateWeeklyReview(buildWeeklyReviewData())
+    await progressStore.submitSheet()
+    await showAlert('已提交，等待审批')
+  } finally {
+    saving.value = false
+  }
 }
 
 watch(selectedDate, () => { loadData() })
@@ -481,8 +496,8 @@ onLoad((options?: Record<string, string>) => {
   flex: 1;
   background: var(--color-bg-card);
   border: 2rpx solid rgba(255, 107, 157, 0.1);
-  border-radius: 16rpx;
-  padding: 16rpx 8rpx;
+  border-radius: 6rpx;
+  padding: 8rpx 4rpx;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -500,40 +515,46 @@ onLoad((options?: Record<string, string>) => {
 }
 
 .day-label {
-  font-size: 24rpx;
+  font-size: 20rpx;
   font-weight: 600;
-  margin-bottom: 4rpx;
-  opacity: 0.8;
+  color: var(--color-text-dim);
+  margin-bottom: 2rpx;
 }
 
 .day-date {
-  font-size: 22rpx;
-  font-weight: 500;
-  opacity: 0.7;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.day-nav-item.active .day-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.day-nav-item.active .day-date {
+  color: var(--color-text-inverse);
 }
 
 .day-status-dot {
-  width: 12rpx;
-  height: 12rpx;
+  width: 8rpx;
+  height: 8rpx;
   border-radius: 50%;
-  margin: 8rpx auto 0;
-  background: var(--color-text-dim);
-  opacity: 0.3;
+  margin: 4rpx auto 0;
+  background: rgba(136, 136, 136, 0.2);
 }
 
 .day-nav-item.completed .day-status-dot {
   background: var(--color-success);
-  opacity: 1;
+  box-shadow: 0 0 6rpx rgba(6, 214, 160, 0.5);
 }
 
 .day-nav-item.submitted .day-status-dot {
   background: var(--color-warning);
-  opacity: 1;
+  box-shadow: 0 0 6rpx rgba(255, 168, 0, 0.5);
 }
 
 .day-nav-item.active .day-status-dot {
-  background: var(--color-text-inverse);
-  opacity: 1;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 /* 传统箭头导航 */
@@ -571,10 +592,18 @@ onLoad((options?: Record<string, string>) => {
 .task-card {
   background: var(--color-bg-card);
   border: 2rpx solid rgba(255, 107, 157, 0.08);
+  border-left: 5rpx solid rgba(136, 136, 136, 0.2);
   border-radius: 12rpx;
   padding: 16rpx;
   margin-bottom: 10rpx;
 }
+
+/* Category accent borders */
+.task-card.cat-academic { border-left-color: var(--color-cat-academic); background: linear-gradient(to right, rgba(94, 174, 255, 0.04), var(--color-bg-card)); }
+.task-card.cat-sports   { border-left-color: var(--color-cat-sports);   background: linear-gradient(to right, rgba(6, 214, 160, 0.04), var(--color-bg-card)); }
+.task-card.cat-language { border-left-color: var(--color-cat-language); background: linear-gradient(to right, rgba(255, 182, 39, 0.04), var(--color-bg-card)); }
+.task-card.cat-art      { border-left-color: var(--color-cat-art);      background: linear-gradient(to right, rgba(199, 125, 255, 0.04), var(--color-bg-card)); }
+.task-card.cat-behavior { border-left-color: var(--color-cat-behavior); background: linear-gradient(to right, rgba(255, 107, 157, 0.04), var(--color-bg-card)); }
 
 .task-header {
   display: flex;
@@ -585,15 +614,40 @@ onLoad((options?: Record<string, string>) => {
 
 .task-header-content {
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8rpx;
   flex-wrap: wrap;
 }
 
+.task-cat-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
+  background: rgba(136, 136, 136, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.task-cat-wrap.cat-icon-academic { background: rgba(94, 174, 255, 0.15); }
+.task-cat-wrap.cat-icon-sports   { background: rgba(6, 214, 160, 0.15); }
+.task-cat-wrap.cat-icon-language { background: rgba(255, 182, 39, 0.15); }
+.task-cat-wrap.cat-icon-art      { background: rgba(199, 125, 255, 0.15); }
+.task-cat-wrap.cat-icon-behavior { background: rgba(255, 107, 157, 0.15); }
+
 .task-cat {
   font-size: 36rpx;
   flex-shrink: 0;
+}
+
+.task-name-text {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .task-note {

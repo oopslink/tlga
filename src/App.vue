@@ -57,8 +57,15 @@ page {
   --color-star-glow: rgba(199, 125, 255, 0.3);
 
   --color-text: #2d2d2d;
-  --color-text-dim: #888888;
+  --color-text-dim: #8a7878;
   --color-text-inverse: #ffffff;
+
+  /* Task category accent colors */
+  --color-cat-academic: #5eaeff;
+  --color-cat-sports: #06d6a0;
+  --color-cat-language: #ffb627;
+  --color-cat-art: #c77dff;
+  --color-cat-behavior: #ff6b9d;
 
   --color-success: #06d6a0;
   --color-warning: #ffa800;
@@ -336,6 +343,24 @@ h1, h2, h3, h4,
   font-size: 64rpx;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.stat-box.stat-gold {
+  background: linear-gradient(135deg, rgba(255, 182, 39, 0.07) 0%, rgba(255, 218, 118, 0.12) 100%);
+  border: 2rpx solid rgba(255, 182, 39, 0.2);
+  border-left: 5rpx solid var(--color-gold);
+}
+
+.stat-box.stat-xp {
+  background: linear-gradient(135deg, rgba(94, 174, 255, 0.07) 0%, rgba(168, 216, 255, 0.12) 100%);
+  border: 2rpx solid rgba(94, 174, 255, 0.2);
+  border-left: 5rpx solid var(--color-xp);
+}
+
+.stat-box.stat-star {
+  background: linear-gradient(135deg, rgba(199, 125, 255, 0.07) 0%, rgba(224, 170, 255, 0.12) 100%);
+  border: 2rpx solid rgba(199, 125, 255, 0.2);
+  border-left: 5rpx solid var(--color-star);
 }
 
 .reward-preview {

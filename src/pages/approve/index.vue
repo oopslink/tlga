@@ -48,11 +48,13 @@
 
       <template v-else>
         <!-- 任务审批列表 -->
-        <view v-for="(task, idx) in sheet.tasks" :key="idx" class="task-card">
+        <view v-for="(task, idx) in sheet.tasks" :key="idx" class="task-card" :class="`cat-${getTaskCategory(task.taskId)}`">
           <view class="task-header">
-            <text class="task-cat">{{ getCatIcon(task.taskId) }}</text>
+            <view class="task-cat-wrap" :class="`cat-icon-${getTaskCategory(task.taskId)}`">
+              <text class="task-cat">{{ getCatIcon(task.taskId) }}</text>
+            </view>
             <view class="task-header-content">
-              <text style="font-weight:bold">{{ getTaskName(task.taskId) }}</text>
+              <text class="task-name-text">{{ getTaskName(task.taskId) }}</text>
             </view>
           </view>
 
@@ -229,10 +231,10 @@
         <!-- 操作按钮 -->
         <view class="actions-bar">
           <template v-if="isReviewable">
-            <button class="button btn-approve" @click="handleApprove">
+            <button class="button btn-approve" @click="handleApprove" :disabled="saving">
               {{ sheet.status === 'approved' ? '✅ 重新审批并结算' : '✅ 通过并结算' }}
             </button>
-            <button class="button btn-reject" @click="handleReject">❌ 驳回</button>
+            <button class="button btn-reject" @click="handleReject" :disabled="saving">❌ 驳回</button>
             <text v-if="sheet.status === 'approved'" class="dim" style="width: 100%;">
               💡 提示：此进度单已审批，可以调整奖励后重新结算
             </text>
@@ -258,6 +260,7 @@ import { useModal } from '@/composables/useModal'
 import { REFLECTION_TYPE_LABELS, REFLECTION_TYPE_ICONS } from '@/engine/reflection-anchor'
 
 const { showAlert, showConfirm } = useModal()
+const saving = ref(false)
 
 const progressStore = useProgressStore()
 const taskDefinitionsStore = useTaskDefinitionsStore()
@@ -332,6 +335,7 @@ function getSheetStatus(date: string): string {
 
 function getTaskName(id: string) { return getTaskById(id)?.name ?? id }
 function getCatIcon(id: string) { const t = getTaskById(id); return t ? CATEGORY_ICONS[t.category] : '' }
+function getTaskCategory(id: string): string { return getTaskById(id)?.category ?? '' }
 function hasVariants(id: string) { const t = getTaskById(id); return !!(t?.variants && t.variants.length > 0) }
 function getVariants(id: string): TaskVariant[] { return getTaskById(id)?.variants ?? [] }
 
@@ -492,26 +496,37 @@ function applyOverrides() {
 }
 
 async function handleApprove() {
+  if (saving.value) return
   const isReApproval = sheet.value?.status === 'approved'
   const message = isReApproval
     ? '确认重新审批？将使用新的奖励重新结算积分。'
     : '确认审批通过？将自动结算积分。'
 
   if (!await showConfirm(message)) return
-  applyOverrides()
-  await progressStore.approveSheet(reviewComment.value || undefined)
-
-  const successMsg = isReApproval
-    ? '重新审批成功，积分已更新！'
-    : '审批通过，积分已结算！'
-  await showAlert(successMsg)
+  saving.value = true
+  try {
+    applyOverrides()
+    await progressStore.approveSheet(reviewComment.value || undefined)
+    const successMsg = isReApproval
+      ? '重新审批成功，积分已更新！'
+      : '审批通过，积分已结算！'
+    await showAlert(successMsg)
+  } finally {
+    saving.value = false
+  }
 }
 
 async function handleReject() {
+  if (saving.value) return
   if (!await showConfirm('确认驳回？小学霸需要修改后重新提交。')) return
-  applyOverrides()
-  await progressStore.rejectSheet(reviewComment.value || '请修改后重新提交')
-  await showAlert('已驳回')
+  saving.value = true
+  try {
+    applyOverrides()
+    await progressStore.rejectSheet(reviewComment.value || '请修改后重新提交')
+    await showAlert('已驳回')
+  } finally {
+    saving.value = false
+  }
 }
 
 async function loadData() {
@@ -541,8 +556,8 @@ onLoad((options?: Record<string, string>) => {
   flex: 1;
   background: var(--color-bg-card);
   border: 2rpx solid rgba(255, 107, 157, 0.1);
-  border-radius: 16rpx;
-  padding: 16rpx 8rpx;
+  border-radius: 6rpx;
+  padding: 8rpx 4rpx;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -568,45 +583,51 @@ onLoad((options?: Record<string, string>) => {
 }
 
 .day-label {
-  font-size: 24rpx;
+  font-size: 20rpx;
   font-weight: 600;
-  margin-bottom: 4rpx;
-  opacity: 0.8;
+  color: var(--color-text-dim);
+  margin-bottom: 2rpx;
 }
 
 .day-date {
-  font-size: 22rpx;
-  font-weight: 500;
-  opacity: 0.7;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.day-nav-item.active .day-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.day-nav-item.active .day-date {
+  color: var(--color-text-inverse);
 }
 
 .day-status-dot {
-  width: 12rpx;
-  height: 12rpx;
+  width: 8rpx;
+  height: 8rpx;
   border-radius: 50%;
-  margin: 8rpx auto 0;
-  background: var(--color-text-dim);
-  opacity: 0.3;
+  margin: 4rpx auto 0;
+  background: rgba(136, 136, 136, 0.2);
 }
 
 .day-nav-item.submitted .day-status-dot {
   background: var(--color-warning);
-  opacity: 1;
+  box-shadow: 0 0 6rpx rgba(255, 168, 0, 0.5);
 }
 
 .day-nav-item.approved .day-status-dot {
   background: var(--color-success);
-  opacity: 1;
+  box-shadow: 0 0 6rpx rgba(6, 214, 160, 0.5);
 }
 
 .day-nav-item.rejected .day-status-dot {
   background: var(--color-danger);
-  opacity: 1;
+  box-shadow: 0 0 6rpx rgba(239, 71, 111, 0.5);
 }
 
 .day-nav-item.active .day-status-dot {
-  background: var(--color-text-inverse);
-  opacity: 1;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 /* 传统箭头导航 */
@@ -681,10 +702,18 @@ onLoad((options?: Record<string, string>) => {
 .task-card {
   background: var(--color-bg-card);
   border: 2rpx solid rgba(255, 107, 157, 0.08);
+  border-left: 5rpx solid rgba(136, 136, 136, 0.2);
   border-radius: 12rpx;
   padding: 16rpx;
   margin-bottom: 10rpx;
 }
+
+/* Category accent borders */
+.task-card.cat-academic { border-left-color: var(--color-cat-academic); background: linear-gradient(to right, rgba(94, 174, 255, 0.04), var(--color-bg-card)); }
+.task-card.cat-sports   { border-left-color: var(--color-cat-sports);   background: linear-gradient(to right, rgba(6, 214, 160, 0.04), var(--color-bg-card)); }
+.task-card.cat-language { border-left-color: var(--color-cat-language); background: linear-gradient(to right, rgba(255, 182, 39, 0.04), var(--color-bg-card)); }
+.task-card.cat-art      { border-left-color: var(--color-cat-art);      background: linear-gradient(to right, rgba(199, 125, 255, 0.04), var(--color-bg-card)); }
+.task-card.cat-behavior { border-left-color: var(--color-cat-behavior); background: linear-gradient(to right, rgba(255, 107, 157, 0.04), var(--color-bg-card)); }
 
 .task-header {
   display: flex;
@@ -695,11 +724,36 @@ onLoad((options?: Record<string, string>) => {
 
 .task-header-content {
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8rpx;
   flex-wrap: wrap;
 }
+
+.task-name-text {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-cat-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
+  background: rgba(136, 136, 136, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.task-cat-wrap.cat-icon-academic { background: rgba(94, 174, 255, 0.15); }
+.task-cat-wrap.cat-icon-sports   { background: rgba(6, 214, 160, 0.15); }
+.task-cat-wrap.cat-icon-language { background: rgba(255, 182, 39, 0.15); }
+.task-cat-wrap.cat-icon-art      { background: rgba(199, 125, 255, 0.15); }
+.task-cat-wrap.cat-icon-behavior { background: rgba(255, 107, 157, 0.15); }
 
 .task-cat {
   font-size: 36rpx;

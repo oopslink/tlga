@@ -28,11 +28,9 @@
           }"
           @click="selectDay(dp.date)"
         >
-          <text class="day-cell-label">{{ getDayLabel(dp.date) }}</text>
-          <text class="day-cell-date">{{ getMonthDay(dp.date) }}</text>
-          <view class="day-cell-dot">
-            <view class="dot" :class="{ 'dot-filled': dp.tasks.length > 0 }"></view>
-          </view>
+          <view class="day-cell-label">{{ getDayLabel(dp.date) }}</view>
+          <view class="day-cell-date">{{ getMonthDay(dp.date) }}</view>
+          <view class="day-cell-dot"></view>
         </view>
       </view>
 
@@ -82,14 +80,15 @@
             v-for="(t, i) in selectedDay.tasks"
             :key="i"
             class="task-row"
-            :class="{ 'task-row-locked': t.isLocked }"
+            :class="[{ 'task-row-locked': t.isLocked }, `cat-${getTaskCat(t.taskId)}`]"
           >
             <view class="task-row-left">
-              <text class="task-icon">{{ t.isLocked ? '🔒' : getCatIcon(t.taskId) }}</text>
+              <view class="task-icon-wrap" :class="`cat-icon-${getTaskCat(t.taskId)}`">
+                <text class="task-icon">{{ t.isLocked ? '🔒' : getCatIcon(t.taskId) }}</text>
+              </view>
               <view class="task-info">
                 <text class="task-name">{{ t.isLocked ? t.note : getTaskName(t.taskId) }}</text>
-                <text v-if="t.isLocked" class="locked-chip">模板</text>
-                <text v-else-if="t.targetVariant" class="variant-chip">{{ t.targetVariant }}</text>
+                <text v-if="t.targetVariant" class="variant-chip">{{ t.targetVariant }}</text>
               </view>
             </view>
             <input
@@ -156,19 +155,19 @@
       <!-- 底部操作栏 -->
       <view class="actions-bar">
         <template v-if="planStore.isDraft">
-          <button class="btn-action btn-save" @click="handleSave">💾 保存草稿</button>
-          <button class="btn-action btn-activate" @click="handleActivate" :disabled="hasNoTasks">
+          <button class="btn-action btn-save" @click="handleSave" :disabled="saving">💾 保存草稿</button>
+          <button class="btn-action btn-activate" @click="handleActivate" :disabled="hasNoTasks || saving">
             🚀 激活计划
           </button>
           <text v-if="hasNoTasks" class="hint-text">请先为某天添加任务再激活</text>
         </template>
         <template v-else-if="planStore.isActive">
-          <button class="btn-action btn-save" @click="handleSave">💾 保存</button>
-          <button class="btn-action btn-reactivate" @click="handleReactivate" :disabled="hasNoTasks">
+          <button class="btn-action btn-save" @click="handleSave" :disabled="saving">💾 保存</button>
+          <button class="btn-action btn-reactivate" @click="handleReactivate" :disabled="hasNoTasks || saving">
             🔄 保存并重新生成进度单
           </button>
         </template>
-        <button class="btn-action btn-danger" @click="handleDelete">🗑️ 清空</button>
+        <button class="btn-action btn-danger" @click="handleDelete" :disabled="saving">🗑️ 清空</button>
       </view>
 
     </template>
@@ -199,6 +198,7 @@ const categories: TaskCategory[] = ['academic', 'sports', 'language', 'art', 'be
 const addState = reactive<Record<string, { taskId: string; note: string }>>({})
 const selectedDate = ref('')
 const todayDate = today()
+const saving = ref(false)
 
 const selectedDay = computed(() =>
   planStore.plan?.dailyPlans.find(d => d.date === selectedDate.value) ?? null
@@ -230,6 +230,7 @@ function tasksByCat(c: TaskCategory) { return getTasksByCategory(c) }
 function getTaskName(id: string) { return getTaskById(id)?.name ?? id }
 function getCatIcon(id: string) { const t = getTaskById(id); return t ? CATEGORY_ICONS[t.category] : '' }
 function getCatIconByCategory(cat: TaskCategory) { return CATEGORY_ICONS[cat] }
+function getTaskCat(id: string): string { return getTaskById(id)?.category ?? '' }
 
 // Template picker helpers
 function getTemplateOptions(): string[] {
@@ -297,27 +298,51 @@ function doAdd(date: string) {
 }
 
 async function handleSave() {
-  await planStore.save()
-  await showAlert('保存成功')
+  if (saving.value) return
+  saving.value = true
+  try {
+    await planStore.save()
+    await showAlert('保存成功')
+  } finally {
+    saving.value = false
+  }
 }
 
 async function handleActivate() {
+  if (saving.value) return
   if (!await showConfirm('激活后将为每天生成进度单，确认？')) return
-  await planStore.activate()
-  await showAlert('计划已激活，进度单已生成！')
+  saving.value = true
+  try {
+    await planStore.activate()
+    await showAlert('计划已激活，进度单已生成！')
+  } finally {
+    saving.value = false
+  }
 }
 
 async function handleReactivate() {
+  if (saving.value) return
   if (!await showConfirm('保存修改并重新生成进度单？原有的进度填写和审批记录将被清空。')) return
-  await planStore.reactivate()
-  await showAlert('计划已保存，进度单已重新生成！')
+  saving.value = true
+  try {
+    await planStore.reactivate()
+    await showAlert('计划已保存，进度单已重新生成！')
+  } finally {
+    saving.value = false
+  }
 }
 
 async function handleDelete() {
+  if (saving.value) return
   if (!await showConfirm('确认清空本周计划？')) return
-  await planStore.deletePlan()
-  selectedDate.value = ''
-  await showAlert('已清空')
+  saving.value = true
+  try {
+    await planStore.deletePlan()
+    selectedDate.value = ''
+    await showAlert('已清空')
+  } finally {
+    saving.value = false
+  }
 }
 
 async function handleSaveAsTemplate(dp: DailyPlan) {
@@ -374,64 +399,64 @@ onLoad(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 28px;
+  margin-bottom: 28rpx;
 }
 
 .header-left {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 12rpx;
 }
 
 .page-title {
-  font-size: 29px;
+  font-size: 58rpx;
   font-weight: 700;
   color: var(--color-primary);
 }
 
 .week-id {
-  font-size: 14px;
+  font-size: 28rpx;
   color: var(--color-text-dim);
 }
 
 .status-pill {
-  padding: 6px 18px;
-  border-radius: 20px;
-  font-size: 13px;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
   font-weight: 700;
 }
 
 .status-pill.draft {
-  background: rgba(136, 136, 136, 0.12);
+  background: rgba(138, 120, 120, 0.1);
   color: var(--color-text-dim);
-  border: 1.5px solid rgba(136, 136, 136, 0.2);
+  border: 2rpx solid rgba(138, 120, 120, 0.2);
 }
 
 .status-pill.active {
-  background: linear-gradient(135deg, rgba(6, 214, 160, 0.12), rgba(6, 214, 160, 0.2));
+  background: rgba(6, 214, 160, 0.12);
   color: var(--color-success);
-  border: 1.5px solid var(--color-success);
+  border: 2rpx solid var(--color-success);
 }
 
 .status-pill.completed {
-  background: linear-gradient(135deg, rgba(94, 174, 255, 0.12), rgba(94, 174, 255, 0.2));
+  background: rgba(94, 174, 255, 0.12);
   color: var(--color-xp);
-  border: 1.5px solid var(--color-xp);
+  border: 2rpx solid var(--color-xp);
 }
 
 /* 7天日历 */
 .week-nav {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
+  display: flex;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
 }
 
 .day-cell {
+  flex: 1;
   background: var(--color-bg-card);
-  border: 2px solid rgba(255, 107, 157, 0.08);
-  border-radius: 18px;
-  padding: 14px 8px;
+  border: 2rpx solid rgba(255, 107, 157, 0.1);
+  border-radius: 6rpx;
+  padding: 8rpx 4rpx;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -439,83 +464,77 @@ onLoad(async () => {
 
 .day-cell.today {
   border-color: var(--color-gold);
-  border-width: 2.5px;
+  border-width: 3rpx;
 }
 
 .day-cell.active {
-  border-color: var(--color-primary);
   background: var(--gradient-primary);
-}
-
-.day-cell.active .day-cell-label,
-.day-cell.active .day-cell-date,
-.day-cell.active .count-badge,
-.day-cell.active .count-empty {
-  color: white;
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .day-cell-label {
-  font-size: 13px;
+  font-size: 20rpx;
   font-weight: 600;
   color: var(--color-text-dim);
-  margin-bottom: 4px;
-  display: block;
+  margin-bottom: 2rpx;
 }
 
 .day-cell-date {
-  font-size: 16px;
+  font-size: 26rpx;
   font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 8px;
-  display: block;
+}
+
+.day-cell.active .day-cell-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.day-cell.active .day-cell-date {
+  color: var(--color-text-inverse);
 }
 
 .day-cell-dot {
-  min-height: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 4px;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
+  width: 8rpx;
+  height: 8rpx;
   border-radius: 50%;
-  background: rgba(136, 136, 136, 0.35);
+  margin: 4rpx auto 0;
+  background: rgba(136, 136, 136, 0.2);
 }
 
-.dot-filled {
-  background: var(--color-primary);
+.day-cell.has-tasks .day-cell-dot {
+  background: var(--color-success);
+  box-shadow: 0 0 6rpx rgba(6, 214, 160, 0.5);
 }
 
-.day-cell.active .dot-filled {
-  background: white;
+.day-cell.active .day-cell-dot {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: none;
 }
 
 /* 详情面板 */
 .day-panel {
   background: var(--color-bg-card);
-  border: 2px solid rgba(255, 107, 157, 0.1);
-  border-radius: 20px;
+  border: 2rpx solid rgba(255, 107, 157, 0.1);
+  border-radius: 20rpx;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 20rpx;
 }
 
 .panel-header {
-  padding: 18px 20px 14px;
-  border-bottom: 2px solid rgba(255, 107, 157, 0.07);
+  padding: 18rpx 20rpx 14rpx;
+  border-bottom: 2rpx solid rgba(255, 107, 157, 0.07);
 }
 
 .panel-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
 }
 
 .panel-date {
-  font-size: 20px;
+  font-size: 36rpx;
   font-weight: 700;
   color: var(--color-primary);
 }
@@ -523,10 +542,10 @@ onLoad(async () => {
 .task-count-chip {
   background: rgba(255, 107, 157, 0.1);
   color: var(--color-primary);
-  border: 1px solid rgba(255, 107, 157, 0.2);
-  padding: 3px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  border: 2rpx solid rgba(255, 107, 157, 0.2);
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 22rpx;
   font-weight: 700;
 }
 
@@ -534,25 +553,25 @@ onLoad(async () => {
 .template-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 8rpx;
   flex-wrap: wrap;
 }
 
 .select-sm {
   background: var(--color-bg-elevated);
-  border: 1.5px solid rgba(255, 107, 157, 0.15);
-  border-radius: 10px;
-  padding: 6px 12px;
-  font-size: 13px;
+  border: 2rpx solid rgba(255, 107, 157, 0.15);
+  border-radius: 10rpx;
+  padding: 8rpx 16rpx;
+  font-size: 26rpx;
 }
 
 .btn-tpl {
   background: none;
-  border: 1.5px solid rgba(255, 107, 157, 0.2);
+  border: 2rpx solid rgba(255, 107, 157, 0.2);
   color: var(--color-primary);
-  padding: 5px 12px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 8rpx 16rpx;
+  border-radius: 10rpx;
+  font-size: 26rpx;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -569,75 +588,105 @@ onLoad(async () => {
 
 /* 任务列表 */
 .tasks-list {
-  padding: 12px 20px;
+  padding: 12rpx 20rpx;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 8rpx;
 }
 
 .task-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 12rpx;
+  padding: 12rpx 14rpx;
   background: var(--color-bg-elevated);
-  border: 1.5px solid rgba(255, 107, 157, 0.06);
-  border-radius: 12px;
+  border: 2rpx solid rgba(255, 107, 157, 0.06);
+  border-left: 5rpx solid rgba(136, 136, 136, 0.15);
+  border-radius: 12rpx;
 }
 
 .task-row-locked {
-  background: linear-gradient(135deg, rgba(94, 174, 255, 0.04), rgba(94, 174, 255, 0.08));
-  border-color: rgba(94, 174, 255, 0.15) !important;
+  opacity: 0.92;
 }
 
+/* Category accent borders on task rows */
+.task-row.cat-academic { border-left-color: var(--color-cat-academic); }
+.task-row.cat-sports   { border-left-color: var(--color-cat-sports); }
+.task-row.cat-language { border-left-color: var(--color-cat-language); }
+.task-row.cat-art      { border-left-color: var(--color-cat-art); }
+.task-row.cat-behavior { border-left-color: var(--color-cat-behavior); }
+
 .locked-chip {
-  background: linear-gradient(135deg, rgba(94, 174, 255, 0.15), rgba(94, 174, 255, 0.25));
+  background: rgba(94, 174, 255, 0.15);
   color: var(--color-xp);
-  border: 1px solid rgba(94, 174, 255, 0.3);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 11px;
+  border: 2rpx solid rgba(94, 174, 255, 0.3);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
   font-weight: 700;
+  align-self: flex-start;
 }
 
 .lock-placeholder {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 44rpx;
+  height: 44rpx;
 }
 
 .task-row-left {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  min-width: 150px;
+  gap: 10rpx;
+  flex: 1;
+  min-width: 0;
 }
 
+.task-icon-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 16rpx;
+  background: rgba(136, 136, 136, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.task-icon-wrap.cat-icon-academic { background: rgba(94, 174, 255, 0.15); }
+.task-icon-wrap.cat-icon-sports   { background: rgba(6, 214, 160, 0.15); }
+.task-icon-wrap.cat-icon-language { background: rgba(255, 182, 39, 0.15); }
+.task-icon-wrap.cat-icon-art      { background: rgba(199, 125, 255, 0.15); }
+.task-icon-wrap.cat-icon-behavior { background: rgba(255, 107, 157, 0.15); }
+
 .task-icon {
-  font-size: 19px;
+  font-size: 36rpx;
   flex-shrink: 0;
 }
 
 .task-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4rpx;
+  min-width: 0;
+  flex: 1;
 }
 
 .task-name {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 28rpx;
   color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .variant-chip {
-  background: linear-gradient(135deg, rgba(255, 182, 39, 0.12), rgba(255, 218, 118, 0.15));
+  background: rgba(255, 182, 39, 0.12);
   color: var(--color-gold-dark);
-  border: 1px solid rgba(255, 182, 39, 0.25);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 12px;
+  border: 2rpx solid rgba(255, 182, 39, 0.25);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
   font-weight: 600;
 }
 
@@ -645,45 +694,45 @@ onLoad(async () => {
   flex: 1;
   background: var(--color-bg-card);
   color: var(--color-text);
-  border: 1.5px solid rgba(255, 107, 157, 0.1);
-  border-radius: 10px;
-  padding: 7px 12px;
-  font-size: 14px;
+  border: 2rpx solid rgba(255, 107, 157, 0.1);
+  border-radius: 10rpx;
+  padding: 10rpx 16rpx;
+  font-size: 26rpx;
 }
 
 .btn-delete {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 48rpx;
+  height: 48rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   background: none;
-  border: 1.5px solid rgba(239, 71, 111, 0.2);
-  border-radius: 8px;
+  border: 2rpx solid rgba(239, 71, 111, 0.2);
+  border-radius: 10rpx;
   color: var(--color-danger);
-  font-size: 12px;
-  opacity: 0.5;
+  font-size: 22rpx;
+  opacity: 0.6;
   padding: 0;
 }
 
 /* 空状态 */
 .empty-tasks {
-  padding: 24px 20px;
+  padding: 40rpx 20rpx;
   text-align: center;
   color: var(--color-text-dim);
-  font-size: 14px;
+  font-size: 28rpx;
 }
 
 /* 添加任务区 */
 .add-section {
-  padding: 12px 20px 16px;
-  border-top: 2px dashed rgba(255, 107, 157, 0.1);
+  padding: 12rpx 20rpx 20rpx;
+  border-top: 2rpx dashed rgba(255, 107, 157, 0.1);
 }
 
 .add-row {
   display: flex;
-  gap: 8px;
+  gap: 8rpx;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -691,31 +740,31 @@ onLoad(async () => {
 .select-task {
   background: var(--color-bg-elevated);
   color: var(--color-text);
-  border: 1.5px solid rgba(255, 107, 157, 0.15);
-  border-radius: 12px;
-  padding: 9px 14px;
-  font-size: 14px;
+  border: 2rpx solid rgba(255, 107, 157, 0.15);
+  border-radius: 12rpx;
+  padding: 14rpx 20rpx;
+  font-size: 28rpx;
   flex-shrink: 0;
 }
 
 .note-add-input {
   flex: 1;
-  min-width: 120px;
+  min-width: 180rpx;
   background: var(--color-bg-elevated);
   color: var(--color-text);
-  border: 1.5px solid rgba(255, 107, 157, 0.12);
-  border-radius: 12px;
-  padding: 9px 14px;
-  font-size: 14px;
+  border: 2rpx solid rgba(255, 107, 157, 0.12);
+  border-radius: 12rpx;
+  padding: 14rpx 20rpx;
+  font-size: 28rpx;
 }
 
 .btn-add {
   background: var(--gradient-primary);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
-  border-radius: 12px;
-  padding: 9px 20px;
-  font-size: 14px;
+  border-radius: 12rpx;
+  padding: 14rpx 28rpx;
+  font-size: 28rpx;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -723,28 +772,28 @@ onLoad(async () => {
 /* 提示 */
 .overview-hint {
   text-align: center;
-  padding: 32px;
+  padding: 56rpx 20rpx;
   color: var(--color-text-dim);
-  font-size: 15px;
+  font-size: 28rpx;
   background: var(--color-bg-card);
-  border: 2px dashed rgba(255, 107, 157, 0.12);
-  border-radius: 20px;
-  margin-bottom: 20px;
+  border: 2rpx dashed rgba(255, 107, 157, 0.12);
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
 }
 
 /* 操作栏 */
 .actions-bar {
   display: flex;
-  gap: 12px;
+  gap: 12rpx;
   flex-wrap: wrap;
   align-items: center;
-  padding-top: 8px;
+  padding-top: 8rpx;
 }
 
 .btn-action {
-  padding: 11px 24px;
-  border-radius: 14px;
-  font-size: 15px;
+  padding: 20rpx 40rpx;
+  border-radius: 14rpx;
+  font-size: 28rpx;
   font-weight: 700;
   border: none;
 }
@@ -752,29 +801,29 @@ onLoad(async () => {
 .btn-save {
   background: var(--color-bg-card);
   color: var(--color-text);
-  border: 2px solid rgba(255, 107, 157, 0.2);
+  border: 2rpx solid rgba(255, 107, 157, 0.2);
 }
 
 .btn-activate {
   background: var(--gradient-primary);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .btn-reactivate {
-  background: linear-gradient(135deg, var(--color-warning) 0%, #ffda76 100%);
-  color: #1a1a2e;
+  background: var(--gradient-gold);
+  color: var(--color-text);
 }
 
 .btn-danger {
   background: transparent;
   color: var(--color-danger);
-  border: 2px solid rgba(239, 71, 111, 0.25);
+  border: 2rpx solid rgba(239, 71, 111, 0.25);
 }
 
 .hint-text {
   width: 100%;
   color: var(--color-warning);
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: 26rpx;
+  margin-top: 8rpx;
 }
 </style>
